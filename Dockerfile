@@ -10,6 +10,6 @@ COPY . /srv
 
 # These three belong to the folder, not to the site: they describe how to
 # serve it, so they must not be served.
-RUN rm -f /srv/Dockerfile /srv/Caddyfile /srv/README.md /srv/.gitignore
+RUN rm -f /srv/Dockerfile /srv/Caddyfile /srv/README.md /srv/.gitignore /srv/.gitattributes /srv/NOTAS.md
 
 EXPOSE 8080
