@@ -1,0 +1,12 @@
+# Store and check out every text file with the same line endings, on any
+# machine. Without this, Windows checks out CRLF and Linux LF, so the files
+# Railway builds from are not byte-for-byte the ones that were tested here.
+* text=auto eol=lf
+
+# Binaries must never be touched.
+*.woff2 binary
+*.webp  binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.mp4   binary
