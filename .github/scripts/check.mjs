@@ -82,8 +82,11 @@ function checkRefs(file, text, attrs) {
     const path = resolveRef(value);
     if (!path || !ASSET.test(path)) continue;
     if (!FILES.has(path)) fail(file, `points at a file that is not there: ${value}`);
+    else referenced.add(path);
   }
 }
+
+const referenced = new Set();
 
 const HTML_ATTRS = /\b(href|src|poster|content)="([^"]*)"/g;
 const CSS_URLS = /\b()url\(["']?([^"')]+)["']?\)/g;
@@ -97,6 +100,7 @@ for (const css of [...FILES].filter((f) => f.endsWith(".css"))) {
     if (!isLocalPath(value)) continue;
     const path = posix.normalize(posix.join(posix.dirname(css), value.split("#")[0]));
     if (!FILES.has(path)) fail(css, `points at a file that is not there: ${value}`);
+    else referenced.add(path);
   }
 }
 
@@ -176,6 +180,43 @@ for (const q of questionsIn(home)) {
   if (!faqQuestions.has(q)) fail("index.html", `asks "${q}", which is not in faq.html`);
 }
 
+/* ---------------------------------------------------------------------
+   6. Everything the site asks for is actually in the image.
+
+      The Dockerfile names what gets copied, one piece at a time, instead
+      of copying the folder and deleting the rest. That only holds as long
+      as the list keeps up with the site, so the list is read back here
+      and compared against what the pages reference.
+   --------------------------------------------------------------------- */
+
+// Files nothing links to, which still have to be there: robots points at
+// the sitemap, and the pages themselves are what the visitor asks for.
+const ALWAYS = [...PAGES, "robots.txt", "sitemap.xml"];
+
+const dockerfile = readFileSync(join(ROOT, "Dockerfile"), "utf8").replace(/\\r?\n/g, " ");
+const served = new Set();
+
+for (const line of dockerfile.split(/\r?\n/)) {
+  const m = line.match(/^\s*COPY\s+(.+)$/i);
+  if (!m) continue;
+  const parts = m[1].trim().split(/\s+/);
+  const dest = parts.pop();
+  if (!dest.startsWith("/srv")) continue; // the Caddyfile goes elsewhere
+  for (const src of parts) {
+    if (src === "." || src === "./" || src === "*") {
+      fail("Dockerfile", "copies the whole folder into the image; name the pieces instead");
+      continue;
+    }
+    const clean = src.replace(/^\.?\//, "").replace(/\/$/, "");
+    if (FILES.has(clean)) served.add(clean);
+    else for (const f of FILES) if (f.startsWith(clean + "/")) served.add(f);
+  }
+}
+
+for (const path of [...referenced, ...ALWAYS]) {
+  if (!served.has(path)) fail("Dockerfile", `does not copy ${path}, which the site needs`);
+}
+
 /* ------------------------------------------------------------------- */
 
 if (problems.length) {
@@ -184,4 +225,6 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`${FILES.size} files, ${PAGES.length} pages, nothing broken.`);
+console.log(
+  `${FILES.size} files, ${PAGES.length} pages, ${served.size} of them served, nothing broken.`,
+);

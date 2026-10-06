@@ -21,6 +21,7 @@ js/               un archivo por pieza que se mueve
 fonts/ brand/ icons/ team/ video/
 Dockerfile        \ cómo se sirve: no son parte de la página
 Caddyfile         /  y no se entregan al visitante
+.github/          la revisión automática, que tampoco se sirve
 ```
 
 Cada archivo de `js/` hace una sola cosa: `voice-note.js` dibuja la onda del
@@ -50,12 +51,21 @@ renderiza no pinta nada.
 
 ## Cómo se publica
 
-`Dockerfile` y `Caddyfile` sirven la carpeta con Caddy. Sin Node y sin
+`Dockerfile` y `Caddyfile` sirven el sitio con Caddy. Sin Node y sin
 compilación; la imagen no tiene gestor de paquetes.
 
-Son unas 80 líneas. Cinco bastarían para entregar los archivos: el resto son
-las cabeceras de seguridad (CSP, HSTS, anti-clickjacking, cámara y micrófono
-desactivados), las reglas de caché, y el 404 con su código correcto. Caddy
+El `Dockerfile` nombra lo que entra en la imagen, pieza por pieza, en vez
+de copiar la carpeta y después borrar lo que sobra. Si un día agregás un
+archivo a la raíz, hay que sumarlo ahí. Olvidarse de una línea de esa lista
+hace que un archivo dé 404 —se nota al toque y no filtra nada—, mientras que
+olvidarse de una línea en una lista de borrado publica un archivo. La
+revisión automática no deja que la lista se quede vieja: falla si las
+páginas piden algo que no se copia.
+
+El `Caddyfile` son unas 80 líneas. Cinco bastarían para entregar los
+archivos: el resto son las cabeceras de seguridad (CSP, HSTS,
+anti-clickjacking, cámara y micrófono desactivados), las reglas de caché, y
+el 404 con su código correcto. Caddy
 responde *Range* por sí solo, que es lo que el video necesita para poder
 adelantarse.
 
@@ -78,6 +88,13 @@ pelearse por la misma propiedad.
 pantalla táctil un toque dejaría el estado pegado, y eso se lee como un error.
 
 ## Verificación
+
+En cada cambio corre `.github/scripts/check.mjs`, que no deja pasar una
+referencia a un archivo que no está (ni escrito con otras mayúsculas: corre
+en Linux), un enlace interno que no aterriza en ningún lado, un
+identificador repetido dentro del mismo documento, un enlace que abra
+pestaña nueva, una pregunta de la home que ya no coincide con `faq.html`, ni
+un archivo que el sitio necesite y la imagen no copie.
 
 El sitio se comparó contra la versión anterior píxel a píxel, sección por
 sección, en seis tamaños de pantalla, con movimiento reducido activado para
