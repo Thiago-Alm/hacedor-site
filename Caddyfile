@@ -1,0 +1,66 @@
+# Serving configuration for Railway.
+#
+# Railway terminates TLS itself and hands the container a port, so Caddy's
+# automatic HTTPS is off and it listens on $PORT. Everything else here is
+# the same set of rules as _headers, which is what Cloudflare and Netlify
+# read; both are kept so the site can move between hosts without a rewrite.
+#
+# Caddy's file_server answers Range requests on its own, which is what the
+# video needs to be seekable — on Cloudflare that took a Worker.
+
+{
+	auto_https off
+	admin off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	header {
+		# The browser only loads what this site itself needs. Nothing comes
+		# from third parties (the fonts are self-hosted), so every source is
+		# 'self'. 'unsafe-inline' covers the style attributes a few elements
+		# carry and the one inline line that marks scripting as available.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+		# Always use HTTPS for a year. No includeSubDomains or preload: hard
+		# to undo, and it would reach other hacedor.org subdomains too.
+		Strict-Transport-Security "max-age=31536000"
+
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+
+		# Powerful features the site never uses are switched off. The video
+		# player needs fullscreen on this origin, so that one stays on.
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), accelerometer=(), gyroscope=(), magnetometer=(), browsing-topics=(), fullscreen=(self)"
+
+		Cross-Origin-Opener-Policy "same-origin"
+
+		# Don't advertise the server software.
+		-Server
+	}
+
+	# Font files never change once published.
+	@fonts path /fonts/*
+	header @fonts Cache-Control "public, max-age=31536000, immutable"
+
+	# Code is replaced in place on every update, so it is revalidated rather
+	# than cached blind: nothing is fingerprinted, because there is no build
+	# step to fingerprint it.
+	@code path /css/* /js/*
+	header @code Cache-Control "public, max-age=0, must-revalidate"
+
+	@media path /brand/* /icons/* /team/* /video/*
+	header @media Cache-Control "public, max-age=86400"
+
+	# A missing page gets the site's own 404, with the right status.
+	handle_errors {
+		@notfound expression {err.status_code} == 404
+		rewrite @notfound /404.html
+		file_server
+	}
+
+	file_server
+}

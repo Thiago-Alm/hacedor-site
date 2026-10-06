@@ -1,0 +1,1484 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Marks that scripting is available, before anything paints. The
+         entrance and reveal animations are scoped to `.js`, so without this
+         the page simply renders in its finished state. -->
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+
+    <title>Hacedor</title>
+    <meta
+      name="description"
+      content="RE-CITE is an interactive and adaptive speech assessment program that integrates the science of speech-language pathology with today's most advanced artificial intelligence systems."
+    />
+    <meta name="application-name" content="Hacedor" />
+    <meta name="author" content="Hacedor, LLC" />
+    <meta
+      name="keywords"
+      content="speech-language pathology, speech assessment, AI, child intelligibility, Direct Magnitude Estimation, RE-CITE"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="https://hacedor.org/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://hacedor.org/" />
+    <meta property="og:site_name" content="Hacedor" />
+    <meta property="og:title" content="Hacedor" />
+    <meta
+      property="og:description"
+      content="RE-CITE is an interactive and adaptive speech assessment program that integrates the science of speech-language pathology with today's most advanced artificial intelligence systems."
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://hacedor.org/opengraph-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Hacedor: RE-CITE, AI speech assessment, over a colorful voice waveform on a dark blue background" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hacedor" />
+    <meta
+      name="twitter:description"
+      content="RE-CITE is an interactive and adaptive speech assessment program that integrates the science of speech-language pathology with today's most advanced artificial intelligence systems."
+    />
+    <meta name="twitter:image" content="https://hacedor.org/twitter-image.jpg" />
+    <meta name="twitter:image:type" content="image/jpeg" />
+    <meta name="twitter:image:width" content="1200" />
+    <meta name="twitter:image:height" content="630" />
+    <meta name="twitter:image:alt" content="Hacedor: RE-CITE, AI speech assessment, over a colorful voice waveform on a dark blue background" />
+
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="favicon.ico" sizes="48x48" type="image/x-icon" />
+    <link rel="icon" href="icon.png" sizes="512x512" type="image/png" />
+    <link rel="apple-touch-icon" href="apple-icon.png" sizes="180x180" type="image/png" />
+
+    <!-- The two faces the first screen needs, fetched alongside the CSS
+         instead of after it. -->
+    <link rel="preload" href="fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/site.css" />
+
+    <!-- Structured data: tells search engines who the company is. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Hacedor, LLC",
+        "alternateName": "Hacedor",
+        "url": "https://hacedor.org",
+        "logo": "https://hacedor.org/icons/icon-512.png",
+        "description": "RE-CITE is an interactive and adaptive speech assessment program that integrates the science of speech-language pathology with today's most advanced artificial intelligence systems.",
+        "email": "Recite@Hacedor.org",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "6545 Market Ave N, Suite 100",
+          "addressLocality": "North Canton",
+          "addressRegion": "OH",
+          "postalCode": "44721",
+          "addressCountry": "US"
+        },
+        "sameAs": ["https://www.linkedin.com/company/hacedor-llc/"]
+      }
+    </script>
+  </head>
+
+  <body>
+    <header class="site-header" data-site-header>
+      <div class="site-header-inner">
+        <a class="site-logo" href="#top" aria-label="Hacedor — back to top">
+          <img
+            src="brand/hacedor-logo-dark-320.webp"
+            alt="Hacedor"
+            width="320"
+            height="82"
+            fetchpriority="high"
+          />
+        </a>
+
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#recite">RE-CITE</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#team">Team</a>
+          <a href="#faq">FAQ</a>
+          <a href="#contact" class="is-always is-cta">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- ================================================================
+           Hero
+           ================================================================ -->
+      <section class="hero" id="top" data-pause-offscreen>
+        <div class="hero-canvas" data-voice-note aria-hidden="true">
+          <canvas></canvas>
+        </div>
+
+        <!-- Gentle scrim over the side the wave already leaves quiet. -->
+        <div class="hero-scrim" aria-hidden="true"></div>
+
+        <div class="hero-body" data-hero-fade data-hero-lift>
+          <div class="hero-inner">
+            <div class="hero-copy" data-hero-copy>
+              <p class="hero-eyebrow">
+                <span class="dot"></span>
+                RE-CITE <span>&middot;</span> AI speech assessment
+              </p>
+
+              <h1 class="hero-headline" data-hero-headline>
+                <span class="hero-line">
+                  <span
+                    >A child&rsquo;s voice,<span class="sheen" aria-hidden="true"
+                      >A child&rsquo;s voice,</span
+                    ></span
+                  >
+                </span>
+                <span class="hero-line">
+                  <span
+                    >measured.<span class="sheen" aria-hidden="true">measured.</span></span
+                  >
+                </span>
+              </h1>
+
+              <p class="hero-lead">
+                An adaptive speech assessment that turns a child&rsquo;s own words into
+                precise, measurable insight &mdash; built for the clinicians who guide them.
+              </p>
+
+              <div class="hero-cta">
+                <a class="btn-pill" href="#recite" data-magnetic>
+                  Learn more
+                  <span class="btn-icon">
+                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path
+                        d="M7 1v12m0 0L2.5 8.5M7 13l4.5-4.5"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-readout" data-hero-fade aria-hidden="true">
+          <div>
+            <p>
+              <span class="dot"></span>
+              <span class="label">Voice sample</span>
+              <span class="time"><span data-hero-clock>0:00</span> / 0:11</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           What is at stake
+           ================================================================ -->
+      <section class="stakes" data-reveal-group="0.4">
+        <div>
+          <p class="stakes-lead" data-rise>
+            A misdiagnosis does not correct itself. The child goes on without the
+            support they needed, and that time does not come back.
+          </p>
+          <p class="stakes-body" data-rise style="--rise-delay: 0.12s">
+            Most assessments happen once, in an unfamiliar room, with an adult the
+            child has only just met. That is not where a child speaks the way they
+            really speak.
+          </p>
+        </div>
+      </section>
+      <!-- ================================================================
+           RE-CITE
+           ================================================================ -->
+      <section class="recite" id="recite">
+        <div class="recite-grid">
+          <div class="recite-copy" data-reveal-group="0.35">
+            <p class="recite-eyebrow" data-rise>
+              <span class="rule"></span>
+              What is RE-CITE
+            </p>
+
+            <h2 class="recite-title h-section" data-rise style="--rise-delay: 0.1s">
+              An assessment that adapts to the child.
+            </h2>
+
+            <p class="recite-lead" data-rise style="--rise-delay: 0.2s">
+              RE-CITE is an interactive, adaptive speech assessment program built on
+              Hacedor&rsquo;s Advanced Word Elicitation Methodology. It brings the
+              science of speech-language pathology together with today&rsquo;s most
+              advanced artificial intelligence, turning a child&rsquo;s speech into
+              clear, measurable insight.
+            </p>
+          </div>
+
+          <div class="recite-media" data-reveal="0.3">
+            <div class="video-player" data-video-player>
+              <video
+                src="video/recite-trailer.mp4"
+                poster="video/recite-poster.jpg"
+                title="RE-CITE trailer"
+                preload="metadata"
+                playsinline
+                controlslist="nodownload noremoteplayback noplaybackrate"
+                disablepictureinpicture
+                disableremoteplayback
+                draggable="false"
+              ></video>
+
+              <button class="vp-big" type="button" data-big-play aria-label="Play video: RE-CITE trailer">
+                <span>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
+                  </svg>
+                </span>
+              </button>
+
+              <div class="vp-bar">
+                <button type="button" data-play aria-label="Play">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-when-playing>
+                    <rect x="6" y="5" width="4" height="14" rx="1.2" />
+                    <rect x="14" y="5" width="4" height="14" rx="1.2" />
+                  </svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-when-paused>
+                    <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z" />
+                  </svg>
+                </button>
+
+                <span class="vp-time" data-elapsed>0:00</span>
+
+                <input class="seek" type="range" min="0" max="0" step="0.1" value="0" aria-label="Seek" />
+
+                <span class="vp-time vp-duration" data-duration>0:00</span>
+
+                <button type="button" data-mute aria-label="Mute">
+                  <svg
+                    width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                  >
+                    <path d="M11 5 6 9H3v6h3l5 4V5Z" fill="currentColor" stroke="none" />
+                    <path d="m16 9 5 6m0-6-5 6" data-when-muted />
+                    <g data-when-unmuted>
+                      <path d="M15.5 9a4 4 0 0 1 0 6" />
+                      <path d="M18.3 6.5a8 8 0 0 1 0 11" />
+                    </g>
+                  </svg>
+                </button>
+
+                <button type="button" data-fullscreen aria-label="Full screen">
+                  <svg
+                    width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                  >
+                    <path d="M9 4v5H4m11-5v5h5M9 20v-5H4m11 5v-5h5" data-when-full />
+                    <path d="M4 9V4h5m6 0h5v5M4 15v5h5m6 0h5v-5" data-when-windowed />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           Stats band
+           ================================================================ -->
+      <section class="stats">
+        <div class="stats-inner">
+          <dl>
+            <div data-reveal="0.6">
+              <dt class="h-section">10</dt>
+              <dd>Phonological dimensions assessed</dd>
+            </div>
+            <div data-reveal="0.6" style="--reveal-delay: 0.08s">
+              <dt class="h-section">15&ndash;20<span>min</span></dt>
+              <dd>Average session</dd>
+            </div>
+            <div data-reveal="0.6" style="--reveal-delay: 0.16s">
+              <dt class="h-section">SLP<span>led</span></dt>
+              <dd>Administered by clinicians</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           How it works
+           ================================================================ -->
+      <section class="hiw" id="how-it-works" data-pause-offscreen>
+      <div class="hiw-stacked">
+        <div>
+          <div class="hiw-heading">
+            <p>
+              <span class="rule"></span>
+              How RE-CITE works
+            </p>
+            <h2 class="h-section">From first consult to a clear report.</h2>
+          </div>
+
+          <ol class="hiw-steps" data-stacked-list>
+            <span class="hiw-rail" aria-hidden="true"><span></span></span>
+
+            <li data-reveal="0.35">
+              <span class="hiw-dot" aria-hidden="true" style="background-color: var(--ink-blue)"></span>
+
+              <div class="hiw-art panel">
+                <div class="step-art" data-active="false">
+                  <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                    <defs>
+                      <pattern id="sa-consult-grid-1" width="25" height="25" patternUnits="userSpaceOnUse">
+                        <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                      </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#sa-consult-grid-1)" />
+                    <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                    <!-- the two parties, and the line of contact between them -->
+                    <path d="M140 150C140 92 268 92 268 150" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.45" />
+                    <circle cx="140" cy="150" r="26" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.34" />
+                    <circle cx="140" cy="150" r="39" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.25" />
+                    <circle cx="140" cy="150" r="52" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.16" />
+                    <circle cx="268" cy="150" r="18" fill="none" stroke="#141e1a" stroke-width="1.4" opacity="0.34" />
+                    <circle cx="268" cy="150" r="31" fill="none" stroke="#141e1a" stroke-width="1.4" opacity="0.25" />
+                    <circle cx="268" cy="150" r="44" fill="none" stroke="#141e1a" stroke-width="1.4" opacity="0.16" />
+                    <circle cx="140" cy="150" r="11" fill="#0073b6" />
+                    <circle cx="268" cy="150" r="7.5" fill="#141e1a" opacity="0.6" />
+                    <!-- the signal has not started yet: a calm baseline -->
+                    <line x1="296" y1="147" x2="296" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                    <line x1="308" y1="147" x2="308" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                    <line x1="320" y1="147" x2="320" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                    <line x1="332" y1="147" x2="332" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                    <line x1="344" y1="147" x2="344" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                    <line x1="356" y1="147" x2="356" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                  </svg>
+                </div>
+              </div>
+
+              <div>
+                <p class="hiw-step-n" style="color: var(--ink-blue)">Step 01</p>
+                <h3>Consult</h3>
+                <p>Meet with a Speech-Language Pathologist, a trained clinician, to get started.</p>
+              </div>
+            </li>
+
+            <li data-reveal="0.35">
+              <span class="hiw-dot" aria-hidden="true" style="background-color: var(--ink-green)"></span>
+
+              <div class="hiw-art panel">
+                <div class="step-art" data-active="false">
+                  <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                    <defs>
+                      <pattern id="sa-engage-grid-2" width="25" height="25" patternUnits="userSpaceOnUse">
+                        <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                      </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#sa-engage-grid-2)" />
+                    <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                    <rect x="52" y="126.4974" width="3.9467" height="47.0051" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="60.9697" y="86.4362" width="3.9467" height="127.1276" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="69.9394" y="105.2095" width="3.9467" height="89.5809" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="78.9091" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="87.8788" y="137.1589" width="3.9467" height="25.6823" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="96.8485" y="106.0535" width="3.9467" height="87.8931" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="105.8182" y="101.141" width="3.9467" height="97.718" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="114.7879" y="117.6706" width="3.9467" height="64.6588" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="123.7576" y="129.1979" width="3.9467" height="41.6042" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="132.7273" y="136.0725" width="3.9467" height="27.855" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="141.697" y="132.2466" width="3.9467" height="35.5068" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="150.6667" y="133.4849" width="3.9467" height="33.0303" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="159.6364" y="139.6176" width="3.9467" height="20.7649" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="168.6061" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="177.5758" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="186.5455" y="141.0338" width="3.9467" height="17.9324" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="195.5152" y="111.1538" width="3.9467" height="77.6924" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="204.4848" y="76.7903" width="3.9467" height="146.4194" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="213.4545" y="87.829" width="3.9467" height="124.342" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="222.4242" y="137.1761" width="3.9467" height="25.6478" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="231.3939" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="240.3636" y="123.2193" width="3.9467" height="53.5614" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="249.3333" y="130.8129" width="3.9467" height="38.3742" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="258.303" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="267.2727" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                    <rect x="276.2424" y="129.5636" width="3.9467" height="40.8729" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="285.2121" y="92.356" width="3.9467" height="115.2881" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="294.1818" y="76.8037" width="3.9467" height="146.3926" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="303.1515" y="89.255" width="3.9467" height="121.4899" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="312.1212" y="111.7483" width="3.9467" height="76.5033" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="321.0909" y="126.5215" width="3.9467" height="46.9569" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="330.0606" y="132.7728" width="3.9467" height="34.4544" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    <rect x="339.0303" y="140.6361" width="3.9467" height="18.7278" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                  </svg>
+                </div>
+              </div>
+
+              <div>
+                <p class="hiw-step-n" style="color: var(--ink-green)">Step 02</p>
+                <h3>Engage</h3>
+                <p>The child plays an interactive speech game while the clinician listens.</p>
+              </div>
+            </li>
+
+            <li data-reveal="0.35">
+              <span class="hiw-dot" aria-hidden="true" style="background-color: var(--ink-orange)"></span>
+
+              <div class="hiw-art panel">
+                <div class="step-art" data-active="false">
+                  <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                    <defs>
+                      <pattern id="sa-ai-grid-3" width="25" height="25" patternUnits="userSpaceOnUse">
+                        <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                      </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#sa-ai-grid-3)" />
+                    <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                    <!-- the same signal, now sampled into discrete cells -->
+                    <rect x="52" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="52" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="52" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="52" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="60.9697" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="60.9697" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="60.9697" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="60.9697" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="60.9697" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="60.9697" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="60.9697" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="60.9697" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="60.9697" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="60.9697" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="69.9394" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="69.9394" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                    <rect x="69.9394" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                    <rect x="69.9394" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                    <rect x="69.9394" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="69.9394" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                    <rect x="69.9394" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                    <rect x="69.9394" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                    <rect x="78.9091" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="78.9091" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="87.8788" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="87.8788" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="96.8485" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="96.8485" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                    <rect x="96.8485" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                    <rect x="96.8485" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                    <rect x="96.8485" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="96.8485" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                    <rect x="96.8485" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                    <rect x="96.8485" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                    <rect x="105.8182" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="105.8182" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                    <rect x="105.8182" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                    <rect x="105.8182" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                    <rect x="105.8182" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="105.8182" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                    <rect x="105.8182" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                    <rect x="105.8182" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                    <rect x="114.7879" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="114.7879" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                    <rect x="114.7879" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="114.7879" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="114.7879" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                    <rect x="114.7879" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="123.7576" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="123.7576" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="123.7576" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="123.7576" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="132.7273" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="132.7273" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="141.697" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="141.697" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="141.697" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="141.697" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="150.6667" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="150.6667" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="159.6364" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="159.6364" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="168.6061" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="168.6061" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="177.5758" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="177.5758" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="186.5455" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="186.5455" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="195.5152" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="195.5152" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                    <rect x="195.5152" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="195.5152" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="195.5152" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                    <rect x="195.5152" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="204.4848" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="204.4848" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                    <rect x="204.4848" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                    <rect x="204.4848" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                    <rect x="204.4848" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                    <rect x="204.4848" y="80.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                    <rect x="204.4848" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="204.4848" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                    <rect x="204.4848" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                    <rect x="204.4848" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                    <rect x="204.4848" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                    <rect x="204.4848" y="210.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                    <rect x="213.4545" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="213.4545" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="213.4545" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="213.4545" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="213.4545" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="213.4545" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="213.4545" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="213.4545" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="213.4545" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="213.4545" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="222.4242" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="222.4242" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="231.3939" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="231.3939" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="240.3636" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="240.3636" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="240.3636" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="240.3636" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="249.3333" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="249.3333" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="249.3333" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="249.3333" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="258.303" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="258.303" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="267.2727" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="267.2727" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="276.2424" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="276.2424" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="276.2424" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="276.2424" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="285.2121" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="285.2121" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="285.2121" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="285.2121" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="285.2121" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="285.2121" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="285.2121" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="285.2121" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="285.2121" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="285.2121" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="294.1818" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="294.1818" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                    <rect x="294.1818" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                    <rect x="294.1818" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                    <rect x="294.1818" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                    <rect x="294.1818" y="80.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                    <rect x="294.1818" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="294.1818" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                    <rect x="294.1818" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                    <rect x="294.1818" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                    <rect x="294.1818" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                    <rect x="294.1818" y="210.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                    <rect x="303.1515" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="303.1515" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="303.1515" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="303.1515" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="303.1515" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="303.1515" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="303.1515" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                    <rect x="303.1515" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="303.1515" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="303.1515" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                    <rect x="312.1212" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="312.1212" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                    <rect x="312.1212" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="312.1212" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="312.1212" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                    <rect x="312.1212" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                    <rect x="321.0909" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="321.0909" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="321.0909" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="321.0909" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                    <rect x="330.0606" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="330.0606" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="339.0303" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    <rect x="339.0303" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                  </svg>
+                  <div class="step-scan" aria-hidden="true"></div>
+                </div>
+              </div>
+
+              <div>
+                <p class="hiw-step-n" style="color: var(--ink-orange)">Step 03</p>
+                <h3>Artificial Intelligence</h3>
+                <p>The recordings collected during the game are evaluated by artificial intelligence, through a scientific process known as Direct Magnitude Estimation.</p>
+              </div>
+            </li>
+
+            <li data-reveal="0.35">
+              <span class="hiw-dot" aria-hidden="true" style="background-color: var(--ink-pink)"></span>
+
+              <div class="hiw-art panel">
+                <div class="step-art" data-active="false">
+                  <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                    <defs>
+                      <pattern id="sa-results-grid-4" width="25" height="25" patternUnits="userSpaceOnUse">
+                        <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                      </pattern>
+                    </defs>
+                    <rect width="400" height="300" fill="url(#sa-results-grid-4)" />
+                    <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                    <defs>
+                      <linearGradient id="sa-results-fill-4" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#d20882" stop-opacity="0.4" />
+                        <stop offset="100%" stop-color="#d20882" stop-opacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <!-- where this child falls against the norm — illustrative, no data -->
+                    <path d="M52 240C122 240 150 80 200 80C250 80 278 240 348 240Z" fill="url(#sa-results-fill-4)" opacity="0.8" />
+                    <path d="M52 240C122 240 150 80 200 80C250 80 278 240 348 240" fill="none" stroke="#d20882" stroke-width="2" opacity="0.9" />
+                    <line x1="247" y1="125" x2="247" y2="240" stroke="#141e1a" stroke-width="1.4" opacity="0.45" stroke-dasharray="4 4" />
+                    <circle cx="247" cy="125" r="6" fill="#d20882" />
+                    <circle cx="247" cy="125" r="13" fill="none" stroke="#d20882" stroke-width="1.4" opacity="0.45" />
+                    <!-- axis -->
+                    <line x1="52" y1="240" x2="348" y2="240" stroke="#141e1a" stroke-width="1" opacity="0.32" />
+                    <line x1="52" y1="240" x2="52" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    <line x1="101.3" y1="240" x2="101.3" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    <line x1="150.6" y1="240" x2="150.6" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    <line x1="199.9" y1="240" x2="199.9" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    <line x1="249.2" y1="240" x2="249.2" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    <line x1="298.5" y1="240" x2="298.5" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    <line x1="347.8" y1="240" x2="347.8" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                  </svg>
+                </div>
+              </div>
+
+              <div>
+                <p class="hiw-step-n" style="color: var(--ink-pink)">Step 04</p>
+                <h3>Results</h3>
+                <p>Receive a detailed speech-language intelligibility assessment report &mdash; a score card with intelligibility scores and percentiles.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="hiw-pinned" data-pinned>
+        <div class="hiw-pinned-track" data-pinned-track>
+          <div class="hiw-pinned-stage">
+            <div class="hiw-pinned-grid">
+              <div class="hiw-pinned-left">
+                <div class="hiw-heading">
+                  <p>
+                    <span class="rule"></span>
+                    How RE-CITE works
+                  </p>
+                  <h2 class="h-section">From first consult to a clear report.</h2>
+                </div>
+
+                <ol class="hiw-list">
+                  <span class="hiw-rail" aria-hidden="true"><span></span></span>
+
+                  <li data-step data-n="01" style="--step-accent: var(--ink-blue)">
+                    <button type="button">
+                      <span>
+                        <span class="n">01</span>
+                        <span class="t">Consult</span>
+                      </span>
+                      <span class="desc">
+                        <span>
+                          <span>Meet with a Speech-Language Pathologist, a trained clinician, to get started.</span>
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+
+                  <li data-step data-n="02" style="--step-accent: var(--ink-green)">
+                    <button type="button">
+                      <span>
+                        <span class="n">02</span>
+                        <span class="t">Engage</span>
+                      </span>
+                      <span class="desc">
+                        <span>
+                          <span>The child plays an interactive speech game while the clinician listens.</span>
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+
+                  <li data-step data-n="03" style="--step-accent: var(--ink-orange)">
+                    <button type="button">
+                      <span>
+                        <span class="n">03</span>
+                        <span class="t">Artificial Intelligence</span>
+                      </span>
+                      <span class="desc">
+                        <span>
+                          <span>The recordings collected during the game are evaluated by artificial intelligence, through a scientific process known as Direct Magnitude Estimation.</span>
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+
+                  <li data-step data-n="04" style="--step-accent: var(--ink-pink)">
+                    <button type="button">
+                      <span>
+                        <span class="n">04</span>
+                        <span class="t">Results</span>
+                      </span>
+                      <span class="desc">
+                        <span>
+                          <span>Receive a detailed speech-language intelligibility assessment report &mdash; a score card with intelligibility scores and percentiles.</span>
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                </ol>
+              </div>
+
+              <div class="hiw-pinned-right">
+                <div class="hiw-stage panel">
+                  <div class="step-art" data-active="false">
+                    <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                      <defs>
+                        <pattern id="sa-consult-grid-5" width="25" height="25" patternUnits="userSpaceOnUse">
+                          <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                        </pattern>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#sa-consult-grid-5)" />
+                      <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                      <!-- the two parties, and the line of contact between them -->
+                      <path d="M140 150C140 92 268 92 268 150" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.45" />
+                      <circle cx="140" cy="150" r="26" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.34" />
+                      <circle cx="140" cy="150" r="39" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.25" />
+                      <circle cx="140" cy="150" r="52" fill="none" stroke="#0073b6" stroke-width="1.4" opacity="0.16" />
+                      <circle cx="268" cy="150" r="18" fill="none" stroke="#141e1a" stroke-width="1.4" opacity="0.34" />
+                      <circle cx="268" cy="150" r="31" fill="none" stroke="#141e1a" stroke-width="1.4" opacity="0.25" />
+                      <circle cx="268" cy="150" r="44" fill="none" stroke="#141e1a" stroke-width="1.4" opacity="0.16" />
+                      <circle cx="140" cy="150" r="11" fill="#0073b6" />
+                      <circle cx="268" cy="150" r="7.5" fill="#141e1a" opacity="0.6" />
+                      <!-- the signal has not started yet: a calm baseline -->
+                      <line x1="296" y1="147" x2="296" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                      <line x1="308" y1="147" x2="308" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                      <line x1="320" y1="147" x2="320" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                      <line x1="332" y1="147" x2="332" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                      <line x1="344" y1="147" x2="344" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                      <line x1="356" y1="147" x2="356" y2="153" stroke="#141e1a" stroke-width="1.4" opacity="0.28" />
+                    </svg>
+                  </div>
+                  <div class="step-art" data-active="false">
+                    <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                      <defs>
+                        <pattern id="sa-engage-grid-6" width="25" height="25" patternUnits="userSpaceOnUse">
+                          <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                        </pattern>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#sa-engage-grid-6)" />
+                      <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                      <rect x="52" y="126.4974" width="3.9467" height="47.0051" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="60.9697" y="86.4362" width="3.9467" height="127.1276" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="69.9394" y="105.2095" width="3.9467" height="89.5809" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="78.9091" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="87.8788" y="137.1589" width="3.9467" height="25.6823" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="96.8485" y="106.0535" width="3.9467" height="87.8931" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="105.8182" y="101.141" width="3.9467" height="97.718" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="114.7879" y="117.6706" width="3.9467" height="64.6588" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="123.7576" y="129.1979" width="3.9467" height="41.6042" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="132.7273" y="136.0725" width="3.9467" height="27.855" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="141.697" y="132.2466" width="3.9467" height="35.5068" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="150.6667" y="133.4849" width="3.9467" height="33.0303" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="159.6364" y="139.6176" width="3.9467" height="20.7649" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="168.6061" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="177.5758" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="186.5455" y="141.0338" width="3.9467" height="17.9324" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="195.5152" y="111.1538" width="3.9467" height="77.6924" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="204.4848" y="76.7903" width="3.9467" height="146.4194" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="213.4545" y="87.829" width="3.9467" height="124.342" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="222.4242" y="137.1761" width="3.9467" height="25.6478" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="231.3939" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="240.3636" y="123.2193" width="3.9467" height="53.5614" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="249.3333" y="130.8129" width="3.9467" height="38.3742" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="258.303" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="267.2727" y="141.5" width="3.9467" height="17" rx="1.9733" fill="#367d1a" opacity="0.9" />
+                      <rect x="276.2424" y="129.5636" width="3.9467" height="40.8729" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="285.2121" y="92.356" width="3.9467" height="115.2881" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="294.1818" y="76.8037" width="3.9467" height="146.3926" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="303.1515" y="89.255" width="3.9467" height="121.4899" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="312.1212" y="111.7483" width="3.9467" height="76.5033" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="321.0909" y="126.5215" width="3.9467" height="46.9569" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="330.0606" y="132.7728" width="3.9467" height="34.4544" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                      <rect x="339.0303" y="140.6361" width="3.9467" height="18.7278" rx="1.9733" fill="#141e1a" opacity="0.3" />
+                    </svg>
+                  </div>
+                  <div class="step-art" data-active="false">
+                    <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                      <defs>
+                        <pattern id="sa-ai-grid-7" width="25" height="25" patternUnits="userSpaceOnUse">
+                          <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                        </pattern>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#sa-ai-grid-7)" />
+                      <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                      <!-- the same signal, now sampled into discrete cells -->
+                      <rect x="52" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="52" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="52" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="52" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="60.9697" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="60.9697" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="60.9697" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="60.9697" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="60.9697" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="60.9697" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="60.9697" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="60.9697" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="60.9697" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="60.9697" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="69.9394" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="69.9394" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                      <rect x="69.9394" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                      <rect x="69.9394" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                      <rect x="69.9394" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="69.9394" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                      <rect x="69.9394" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                      <rect x="69.9394" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                      <rect x="78.9091" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="78.9091" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="87.8788" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="87.8788" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="96.8485" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="96.8485" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                      <rect x="96.8485" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                      <rect x="96.8485" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                      <rect x="96.8485" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="96.8485" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                      <rect x="96.8485" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                      <rect x="96.8485" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                      <rect x="105.8182" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="105.8182" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                      <rect x="105.8182" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                      <rect x="105.8182" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                      <rect x="105.8182" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="105.8182" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.408" />
+                      <rect x="105.8182" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.356" />
+                      <rect x="105.8182" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.304" />
+                      <rect x="114.7879" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="114.7879" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                      <rect x="114.7879" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="114.7879" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="114.7879" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                      <rect x="114.7879" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="123.7576" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="123.7576" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="123.7576" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="123.7576" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="132.7273" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="132.7273" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="141.697" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="141.697" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="141.697" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="141.697" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="150.6667" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="150.6667" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="159.6364" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="159.6364" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="168.6061" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="168.6061" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="177.5758" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="177.5758" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="186.5455" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="186.5455" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="195.5152" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="195.5152" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                      <rect x="195.5152" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="195.5152" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="195.5152" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                      <rect x="195.5152" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="204.4848" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="204.4848" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                      <rect x="204.4848" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                      <rect x="204.4848" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                      <rect x="204.4848" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                      <rect x="204.4848" y="80.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                      <rect x="204.4848" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="204.4848" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                      <rect x="204.4848" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                      <rect x="204.4848" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                      <rect x="204.4848" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                      <rect x="204.4848" y="210.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                      <rect x="213.4545" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="213.4545" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="213.4545" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="213.4545" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="213.4545" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="213.4545" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="213.4545" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="213.4545" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="213.4545" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="213.4545" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="222.4242" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="222.4242" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="231.3939" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="231.3939" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="240.3636" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="240.3636" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="240.3636" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="240.3636" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="249.3333" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="249.3333" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="249.3333" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="249.3333" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="258.303" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="258.303" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="267.2727" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="267.2727" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="276.2424" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="276.2424" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="276.2424" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="276.2424" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="285.2121" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="285.2121" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="285.2121" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="285.2121" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="285.2121" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="285.2121" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="285.2121" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="285.2121" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="285.2121" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="285.2121" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="294.1818" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="294.1818" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                      <rect x="294.1818" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                      <rect x="294.1818" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                      <rect x="294.1818" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                      <rect x="294.1818" y="80.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                      <rect x="294.1818" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="294.1818" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4229" />
+                      <rect x="294.1818" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3857" />
+                      <rect x="294.1818" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3486" />
+                      <rect x="294.1818" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3114" />
+                      <rect x="294.1818" y="210.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2743" />
+                      <rect x="303.1515" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="303.1515" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="303.1515" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="303.1515" y="103.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="303.1515" y="92" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="303.1515" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="303.1515" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.4167" />
+                      <rect x="303.1515" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="303.1515" y="187.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="303.1515" y="199" width="9" height="9" rx="2" fill="#141e1a" opacity="0.2867" />
+                      <rect x="312.1212" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="312.1212" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                      <rect x="312.1212" y="115.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="312.1212" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="312.1212" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.395" />
+                      <rect x="312.1212" y="175.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.33" />
+                      <rect x="321.0909" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="321.0909" y="126.8" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="321.0909" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="321.0909" y="164.2" width="9" height="9" rx="2" fill="#141e1a" opacity="0.3733" />
+                      <rect x="330.0606" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="330.0606" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="339.0303" y="138.4" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                      <rect x="339.0303" y="152.6" width="9" height="9" rx="2" fill="#141e1a" opacity="0.46" />
+                    </svg>
+                    <div class="step-scan" aria-hidden="true"></div>
+                  </div>
+                  <div class="step-art" data-active="false">
+                    <svg class="step-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-hidden="true">
+                      <defs>
+                        <pattern id="sa-results-grid-8" width="25" height="25" patternUnits="userSpaceOnUse">
+                          <path d="M25 0H0v25" fill="none" stroke="#141e1a" stroke-width="0.5" opacity="0.1" />
+                        </pattern>
+                      </defs>
+                      <rect width="400" height="300" fill="url(#sa-results-grid-8)" />
+                      <line x1="24" y1="150" x2="376" y2="150" stroke="#141e1a" stroke-width="1" opacity="0.14" />
+                      <defs>
+                        <linearGradient id="sa-results-fill-8" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#d20882" stop-opacity="0.4" />
+                          <stop offset="100%" stop-color="#d20882" stop-opacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <!-- where this child falls against the norm — illustrative, no data -->
+                      <path d="M52 240C122 240 150 80 200 80C250 80 278 240 348 240Z" fill="url(#sa-results-fill-8)" opacity="0.8" />
+                      <path d="M52 240C122 240 150 80 200 80C250 80 278 240 348 240" fill="none" stroke="#d20882" stroke-width="2" opacity="0.9" />
+                      <line x1="247" y1="125" x2="247" y2="240" stroke="#141e1a" stroke-width="1.4" opacity="0.45" stroke-dasharray="4 4" />
+                      <circle cx="247" cy="125" r="6" fill="#d20882" />
+                      <circle cx="247" cy="125" r="13" fill="none" stroke="#d20882" stroke-width="1.4" opacity="0.45" />
+                      <!-- axis -->
+                      <line x1="52" y1="240" x2="348" y2="240" stroke="#141e1a" stroke-width="1" opacity="0.32" />
+                      <line x1="52" y1="240" x2="52" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                      <line x1="101.3" y1="240" x2="101.3" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                      <line x1="150.6" y1="240" x2="150.6" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                      <line x1="199.9" y1="240" x2="199.9" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                      <line x1="249.2" y1="240" x2="249.2" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                      <line x1="298.5" y1="240" x2="298.5" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                      <line x1="347.8" y1="240" x2="347.8" y2="248" stroke="#141e1a" stroke-width="1" opacity="0.28" />
+                    </svg>
+                  </div>
+
+                  <!-- One text run, no inner element: a span boundary breaks text
+                       shaping, and with letter-spacing that moves the digits. -->
+                  <div class="hiw-hud" data-hud style="--step-accent: var(--ink-blue)"><span></span>Step 01 / 04</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </section>
+      <!-- ================================================================
+           Vision
+           ================================================================ -->
+      <section class="vision">
+        <figure data-reveal="0.4">
+          <figcaption>
+            <span class="rule"></span>
+            Our vision
+            <span class="rule"></span>
+          </figcaption>
+
+          <blockquote class="h-section">
+            Our approach transforms variability into measurable accuracy.
+          </blockquote>
+
+          <p>
+            Leading the way in innovation, delivering precise and efficient solutions
+            that enhance daily living, such as human speech articulation. With RE-CITE,
+            setting new standards for excellence in speech intelligibility assessment.
+          </p>
+        </figure>
+      </section>
+
+      <!-- ================================================================
+           Team
+           ================================================================ -->
+      <section class="team" id="team">
+        <div class="team-inner">
+          <div class="team-intro" data-reveal-group="0.3">
+            <div>
+              <p class="section-eyebrow" data-rise>
+                <span class="rule"></span>
+                Who we are
+              </p>
+
+              <h2 class="team-title h-section" data-rise style="--rise-delay: 0.1s">
+                Built by clinicians and scientists.
+              </h2>
+            </div>
+
+            <div>
+            <p class="team-lead" data-rise style="--rise-delay: 0.2s">
+              We are <em>Hacedores</em>, Spanish for &ldquo;makers&rdquo;: a team
+              passionate about advancing speech-language pathology by assessing
+              articulation and phonology, and committed to thought leadership in
+              innovation that improves daily life.
+            </p>
+
+            <p class="team-quote" data-rise style="--rise-delay: 0.3s">
+              &ldquo;We uncover our nature through action.&rdquo; &mdash; Steven Pressfield
+            </p>
+            </div>
+          </div>
+
+          <div class="team-roster">
+            <h3 class="roster-title h-section" data-reveal="0.8">
+              Hacedor&rsquo;s Team
+              <span class="rule" aria-hidden="true"></span>
+            </h3>
+
+            <ul class="team-list" data-reveal-group="0.15">
+              <li data-rise>
+                <article class="member panel" data-member>
+                  <div class="member-glow" aria-hidden="true"></div>
+                  <div class="member-portrait">
+                    <div>
+                      <img
+                        src="team/javier-livio.webp"
+                        alt="Portrait of Javier Livio"
+                        width="720" height="720" loading="lazy"
+                        sizes="(min-width: 1280px) 300px, (min-width: 640px) 45vw, 90vw"
+                      />
+                    </div>
+                  </div>
+                  <div class="member-name">
+                    <h3>Javier Livio</h3>
+                    <span class="member-credentials">PhD</span>
+                  </div>
+                  <p class="member-role">Founder &middot; President &amp; CTO</p>
+                  <p class="member-bio">
+                    A hands-on scholar-technologist whose career spans multiple
+                    industries and technologies. Specializes in standardized patterns
+                    for deploying reliable, scalable and secure distributed software
+                    solutions.
+                  </p>
+                </article>
+              </li>
+
+              <li data-rise style="--rise-delay: 0.1s">
+                <article class="member panel" data-member>
+                  <div class="member-glow" aria-hidden="true"></div>
+                  <div class="member-portrait">
+                    <div>
+                      <img
+                        src="team/noah-dormady.webp"
+                        alt="Portrait of Noah Dormady"
+                        width="720" height="720" loading="lazy"
+                        sizes="(min-width: 1280px) 300px, (min-width: 640px) 45vw, 90vw"
+                      />
+                    </div>
+                  </div>
+                  <div class="member-name">
+                    <h3>Noah Dormady</h3>
+                    <span class="member-credentials">PhD</span>
+                  </div>
+                  <p class="member-role">Cofounder &middot; CSO</p>
+                  <p class="member-bio">
+                    An award-winning economist and public policy professor at The Ohio
+                    State University. Specializes in energy and environmental policy and
+                    economics, economic resilience to natural hazards, risk and decision
+                    analysis, and applied public policy analysis.
+                  </p>
+                </article>
+              </li>
+
+              <li data-rise style="--rise-delay: 0.2s">
+                <article class="member panel" data-member>
+                  <div class="member-glow" aria-hidden="true"></div>
+                  <div class="member-portrait">
+                    <div>
+                      <img
+                        src="team/ewa-jacewicz.webp"
+                        alt="Portrait of Ewa Jacewicz"
+                        width="720" height="720" loading="lazy"
+                        sizes="(min-width: 1280px) 300px, (min-width: 640px) 45vw, 90vw"
+                      />
+                    </div>
+                  </div>
+                  <div class="member-name">
+                    <h3>Ewa Jacewicz</h3>
+                    <span class="member-credentials">PhD</span>
+                  </div>
+                  <p class="member-role">Scientific Advisor</p>
+                  <p class="member-bio">
+                    An internationally recognized researcher in speech and language, and
+                    research professor at The Ohio State University. Work focuses on
+                    variation in pronunciation patterns across all ages, from children to
+                    older adults, including dialect variation in American English, second
+                    language acquisition, and speech-language disorders.
+                  </p>
+                </article>
+              </li>
+
+              <li data-rise style="--rise-delay: 0.3s">
+                <article class="member panel" data-member>
+                  <div class="member-glow" aria-hidden="true"></div>
+                  <div class="member-portrait">
+                    <div>
+                      <img
+                        src="team/melba-acey.webp"
+                        alt="Portrait of Melba Acey"
+                        width="720" height="720" loading="lazy"
+                        sizes="(min-width: 1280px) 300px, (min-width: 640px) 45vw, 90vw"
+                      />
+                    </div>
+                  </div>
+                  <div class="member-name">
+                    <h3>Melba Acey</h3>
+                    <span class="member-credentials">MSP, CCC-SLP</span>
+                  </div>
+                  <p class="member-role">
+                    Cofounder &middot; Speech-Language Pathologist, Clinical Specialist
+                  </p>
+                  <p class="member-bio">
+                    An ASHA Board Certified Speech-Language Pathologist with two decades
+                    of clinical practice across home-based care, early intervention,
+                    outpatient clinics, schools and private practice. Owner and founder of
+                    Rocket City Speech Therapy, a pediatric private practice in Huntsville,
+                    Alabama.
+                  </p>
+                </article>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           Questions
+           ================================================================ -->
+      <section class="faq" id="faq">
+        <div class="faq-inner">
+          <div class="faq-home-head" data-reveal-group="0.3">
+            <p class="section-eyebrow" data-rise>
+              <span class="rule"></span>
+              Questions
+            </p>
+            <h2 class="faq-title h-section" data-rise style="--rise-delay: 0.1s">
+              What clinicians ask first.
+            </h2>
+          </div>
+
+          <div data-reveal="0.15">
+            <details class="faq-item" id="what-is-re-cite">
+              <summary>
+                What is RE-CITE?
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-answer">
+                <p>RE-CITE is an AI-based tool developed specifically for use by trained Speech-Language Pathologists (SLPs) to assess and track children&rsquo;s speech intelligibility. RE-CITE&rsquo;s design works to ensure that every child benefits from a reliable, SLP-administered assessment, giving parents, educators, and pediatricians a solid foundation for understanding and supporting each child&rsquo;s communication journey.</p>
+              </div>
+            </details>
+            <details class="faq-item" id="diagnosis-or-treatment">
+              <summary>
+                Is RE-CITE for diagnosis or treatment?
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-answer">
+                <p>RE-CITE can be used for both diagnostic purposes and progress monitoring.</p>
+                <p>For diagnostics, RE-CITE provides in-depth speech intelligibility assessments, offering separate statistical quantifications for various dimensions of intelligibility.</p>
+                <p>Unlike traditional formalized assessments that are typically administered infrequently, RE-CITE is uniquely designed for progress monitoring. It can be used multiple times over the course of treatment to track a child&rsquo;s progress toward their goals. By quantifying improvements across specific dimensions of intelligibility at each session, appointment, or visit, RE-CITE provides clinicians with actionable data to inform ongoing therapy decisions. While not designed as a therapy resource, its ability to monitor progress over time makes it a valuable tool for measuring treatment outcomes.</p>
+              </div>
+            </details>
+            <details class="faq-item" id="how-long">
+              <summary>
+                How long does a RE-CITE assessment take?
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-answer">
+                <p>Because RE-CITE is an adaptive tool that learns from each child as they engage, completion times are not the same for every child. SLPs should plan for 15 to 20 minutes on average for a completed RE-CITE session.</p>
+              </div>
+            </details>
+            <details class="faq-item" id="standardized">
+              <summary>
+                Is RE-CITE a standardized assessment?
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-answer">
+                <p>While the reports generated for each child from a RE-CITE session are standardized, RE-CITE itself is not a traditional standardized assessment. Instead, it is an adaptive tool, with no two sessions being identical. The AI engine learns from and adapts to each child in a unique, data-driven manner to provide personalized insights.</p>
+                <p>As highlighted in a recent ASHA publication, &ldquo;Psychometrically sound standardized tests can act as a piece of an assessment battery but should never act as the sole indicator of typical versus disordered development.&rdquo; This underscores the importance of incorporating tools like RE-CITE, which generate norm-referenced data while adapting to the individual, as part of a comprehensive approach to diagnosing speech sound disorders in children. By blending standardized reporting with adaptive assessment methods, RE-CITE supports a balanced and thorough evaluation process.</p>
+                <p class="faq-cite"><a href="https://doi.org/10.1044/2018_PERS-SIG1-2018-0018">Standardized Tests and the Diagnosis of Speech Sound Disorders</a>, Perspectives of the ASHA Special Interest Groups, Volume 4, Number 1, Pages 58&ndash;66.</p>
+              </div>
+            </details>
+            <details class="faq-item" id="all-sounds">
+              <summary>
+                Does RE-CITE assess all sounds and in all contexts?
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-answer">
+                <p>RE-CITE is designed to assess a range of consonants and vowels at the word level, providing detailed insights into a child&rsquo;s speech production. While its current focus is on word-level assessments, future applications may include the capability to analyze conversational speech samples.</p>
+                <p>Research published in the Journal of Speech, Language, and Hearing Research highlights the value of single-word sampling, stating, &ldquo;On measures of intelligibility, speech accuracy, and phonemic inventory, obtaining a single-word sample proved to be a more informative method of differentiating children with speech sound disorders from typically developing children than connected speech samples.&rdquo; This evidence underscores the effectiveness of RE-CITE&rsquo;s word-level approach in supporting accurate and reliable assessments.</p>
+                <p class="faq-cite"><a href="https://doi.org/10.1044/2021_JSLHR-20-00172">Comparing the Informativeness of Single-Word Samples and Connected Speech Samples in Assessing Speech Sound Disorders</a>, Journal of Speech, Language, and Hearing Research, Volume 64, Number 11, Pages 4071&ndash;4084.</p>
+              </div>
+            </details>
+
+            <a class="faq-more" href="faq.html">
+              <span>All thirteen questions</span>
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M3 8h10m0 0-4-4m4 4-4 4"
+                  stroke="currentColor" stroke-width="1.7"
+                  stroke-linecap="round" stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+      <!-- ================================================================
+           Contact
+           ================================================================ -->
+      <section class="contact" id="contact" data-pause-offscreen>
+        <div class="contact-grid" data-reveal-group="0.25">
+          <div class="contact-main">
+            <p class="section-eyebrow" data-rise>
+              <span class="rule"></span>
+              Contact us
+            </p>
+
+            <h2 class="contact-title h-section" data-rise style="--rise-delay: 0.1s">
+              Talk to the team.
+            </h2>
+
+            <p class="contact-lead" data-rise style="--rise-delay: 0.2s">
+              Questions about RE-CITE, or how it could fit your clinic or school? Write to
+              us &mdash; we read every message.
+            </p>
+
+            <div class="contact-email-block" data-rise style="--rise-delay: 0.3s">
+              <p class="contact-label">Email</p>
+
+              <a class="contact-email" href="mailto:Recite@Hacedor.org">
+                <span>Recite@Hacedor.org</span>
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M3.5 12.5 12.5 3.5M5 3.5h7.5V11"
+                    stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"
+                  />
+                </svg>
+              </a>
+
+              <div class="contact-actions">
+                <a class="btn-solid" href="mailto:Recite@Hacedor.org">Send an email</a>
+
+                <button class="btn-outline" type="button" data-copy="Recite@Hacedor.org">
+                  <span data-idle>Copy email</span>
+                  <span data-copied>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path
+                        d="m3.5 8.5 3 3 6-7"
+                        stroke="var(--accent-green)" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round"
+                      />
+                    </svg>
+                    Copied
+                  </span>
+                </button>
+
+                <span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-side" data-rise style="--rise-delay: 0.2s">
+            <div class="contact-card panel">
+              <div class="contact-radar" aria-hidden="true">
+                <span style="width: 100%; height: 100%; opacity: 1"></span>
+                <span style="width: 72%; height: 72%; opacity: 0.88"></span>
+                <span style="width: 46%; height: 46%; opacity: 0.76"></span>
+                <span style="width: 24%; height: 24%; opacity: 0.64"></span>
+                <span class="pin"></span>
+              </div>
+
+              <p class="contact-label">Visit us</p>
+
+              <address class="contact-address">
+                <span>6545 Market Ave N</span>
+                <span>Suite 100</span>
+                <span>North Canton, OH 44721</span>
+              </address>
+
+              <a
+                class="contact-directions"
+                href="https://www.google.com/maps/search/?api=1&amp;query=6545%20Market%20Ave%20N%20Suite%20100%2C%20North%20Canton%2C%20OH%2044721"
+              >
+                Get directions
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M3.5 12.5 12.5 3.5M5 3.5h7.5V11"
+                    stroke="currentColor" stroke-width="1.7"
+                    stroke-linecap="round" stroke-linejoin="round"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==================================================================
+         Footer
+         ================================================================== -->
+    <footer class="site-footer" data-pause-offscreen>
+      <div class="site-footer-inner">
+        <div class="wave-divider" data-wave aria-hidden="true">
+          <canvas></canvas>
+        </div>
+
+        <div class="footer-main">
+          <div class="footer-brand">
+            <a href="#top" aria-label="Hacedor — back to top">
+              <img
+                src="brand/hacedor-logo-dark-320.webp"
+                alt="Hacedor"
+                width="320"
+                height="82"
+                loading="lazy"
+              />
+            </a>
+            <p>
+              RE-CITE: science-based speech assessment, powered by artificial
+              intelligence.
+            </p>
+            <a
+              class="footer-linkedin"
+              href="https://www.linkedin.com/company/hacedor-llc/posts/?feedView=all"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"
+                />
+              </svg>
+              LinkedIn
+            </a>
+          </div>
+
+          <nav class="footer-nav" aria-label="Footer">
+            <p class="footer-col-title">Explore</p>
+            <ul>
+              <li><a class="footer-link" href="#recite">RE-CITE</a></li>
+              <li><a class="footer-link" href="#how-it-works">How it works</a></li>
+              <li><a class="footer-link" href="#team">Team</a></li>
+              <li><a class="footer-link" href="#contact">Contact</a></li>
+              <li><a class="footer-link" href="faq.html">Questions</a></li>
+            </ul>
+          </nav>
+
+          <div>
+            <p class="footer-col-title">Get in touch</p>
+            <a
+              class="footer-link footer-link-underlined"
+              href="mailto:Recite@Hacedor.org"
+              >Recite@Hacedor.org</a
+            >
+          </div>
+
+          <div>
+            <p class="footer-col-title">Visit us</p>
+            <address class="footer-address">
+              <span>6545 Market Ave N</span>
+              <span>Suite 100</span>
+              <span>North Canton, OH 44721</span>
+            </address>
+            <a
+              class="footer-link footer-link-underlined footer-directions"
+              href="https://www.google.com/maps/search/?api=1&amp;query=6545%20Market%20Ave%20N%20Suite%20100%2C%20North%20Canton%2C%20OH%2044721"
+            >
+              Get directions
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2021&ndash;<span data-year>2026</span> Hacedor, LLC. All rights reserved.</p>
+          <p>
+            Built by
+            <a
+              class="footer-builder"
+              href="https://www.linkedin.com/in/thiago-almeida-865744334"
+            >
+              Almeida<span class="sr-only"> on LinkedIn</span>
+            </a>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/lenis.min.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/header.js"></script>
+    <script src="js/voice-note.js"></script>
+    <script src="js/hero.js"></script>
+    <script src="js/video-player.js"></script>
+    <script src="js/how-it-works.js"></script>
+    <script src="js/interactions.js"></script>
+    <script src="js/footer-wave.js"></script>
+  </body>
+</html>

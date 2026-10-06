@@ -1,0 +1,2990 @@
+/* =========================================================================
+   Hacedor — foundation
+   Tokens, resets and the few mechanisms every section shares. Section styles
+   follow, in the order the sections appear on the page.
+   ========================================================================= */
+
+:root {
+  /* Warm bone paper with a green-black ink. The cool ink over a warm ground
+     is the deliberate tension: generated pages pair cool with cool. */
+  --paper: #f4f1ea;
+  --surface: #fbf9f5;
+  --ink: #141e1a;
+  --muted: #5e6b64;
+  --line: rgba(20, 30, 26, 0.09);
+  /* The one accent that carries enough contrast on paper (4.8:1). */
+  --accent: #0a6fa8;
+  --accent-green: #2e7d4f;
+
+  /* The logo's hues, each darkened until it clears 4.5:1 on the bone ground —
+     the raw versions sit between 1.1:1 (yellow) and 2.5:1 (blue), so they
+     cannot carry type here. Used for the step sequence. */
+  --ink-blue: #0073b6;
+  --ink-green: #367d1a;
+  --ink-orange: #b94d13;
+  --ink-pink: #d20882;
+
+  --font-sans: Geist, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-brand: Fraunces, Georgia, "Times New Roman", serif;
+
+  /* The one easing curve the whole page moves on. */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* -------------------------------------------------------------------------
+   Reset
+   Tailwind's preflight used to do this. It is reproduced rather than dropped
+   because the layout depends on it: zeroed margins, border-box sizing and
+   headings that inherit their size are assumptions made throughout.
+   ------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  border: 0 solid var(--line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  height: 100%;
+  background: var(--paper);
+  color-scheme: light;
+  /* Matches the `antialiased` class the old document root carried; without
+     it every weight on the page renders noticeably heavier. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+img,
+svg,
+video,
+canvas,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+button {
+  cursor: pointer;
+  -webkit-appearance: button;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* -------------------------------------------------------------------------
+   Page surface
+   ------------------------------------------------------------------------- */
+
+/* Page-wide wash, fixed so every section (and the transparent hero canvas)
+   shares it. Barely-there tints, not a gradient feature. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 58% 62% at 6% 98%, rgba(10, 111, 168, 0.07), transparent 70%),
+    radial-gradient(ellipse 50% 52% at 96% 2%, rgba(46, 125, 79, 0.06), transparent 70%);
+}
+
+/* Fine grain over everything: it reads as paper stock and keeps the large
+   flat areas from looking machine-printed. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("../brand/grain.png");
+  background-size: 128px 128px;
+}
+
+/* Raised panel: a tonal lift plus a hairline, rather than the grey-bordered
+   card every generated page reaches for. */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(20, 30, 26, 0.05);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------
+   Type
+   ------------------------------------------------------------------------- */
+
+/* Section headline: the same serif voice as the hero, so the brand carries
+   through the page instead of appearing once and never again. */
+.h-section {
+  font-family: var(--font-brand);
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 72;
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 1.04;
+}
+
+/* -------------------------------------------------------------------------
+   Reveal on scroll
+
+   Replaces Motion's `whileInView`. A transition on opacity and transform is
+   composited by the GPU, where Motion animated the same properties from
+   JavaScript on every frame.
+
+   Everything is scoped to `.js` so that with scripting unavailable the page
+   is simply all visible, instead of blank.
+   ------------------------------------------------------------------------- */
+
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 1rem), 0);
+  transition:
+    opacity var(--reveal-dur, 0.8s) var(--ease) var(--reveal-delay, 0s),
+    transform var(--reveal-dur, 0.8s) var(--ease) var(--reveal-delay, 0s);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Sections flagged with data-pause-offscreen get [data-paused] while off
+   screen: their animations stop ticking. Nothing changes visually. */
+[data-paused],
+[data-paused] *,
+[data-paused]::before,
+[data-paused]::after {
+  animation-play-state: paused !important;
+}
+
+/* =========================================================================
+   Hero
+
+   Two layouts, switched on a single condition: wide screens (and short
+   landscape windows, where stacking would not fit) put the copy on the left
+   with the wave opening to its right; everything else stacks, with the wave
+   dropped into the lower half. The waveform shader reads the same condition,
+   so the two can never disagree.
+   ========================================================================= */
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Gentle scrim over the side the wave already leaves quiet, so the copy
+   keeps its contrast without dimming the wave itself. */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(244, 241, 234, 0.9),
+    rgba(244, 241, 234, 0.45) 42%,
+    transparent 70%
+  );
+}
+
+.hero-body {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex: 1 1 0%;
+  align-items: flex-start;
+  padding-top: 7rem;
+  padding-bottom: 10rem;
+}
+
+.hero-inner {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1600px;
+  padding-inline: 1.25rem;
+}
+
+.hero-copy {
+  max-width: 34rem;
+}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: clamp(0.75rem, 2.6vh, 1.5rem);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.hero-eyebrow .dot {
+  flex-shrink: 0;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--accent-green);
+}
+
+.hero-headline {
+  position: relative;
+  font-family: var(--font-brand);
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 72;
+  font-size: clamp(2.4rem, min(6.4vw, 12.5vh), 5.75rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.032em;
+  color: var(--ink);
+}
+
+/* Each line rises out of its own mask. The negative margin cancels the
+   padding that keeps descenders from being clipped by the overflow. */
+.hero-line {
+  display: block;
+  overflow: hidden;
+  margin-block: -0.08em;
+  padding-block: 0.08em;
+}
+
+.hero-line > span {
+  position: relative;
+  display: block;
+}
+
+/* A coloured highlight that travels with the waveform playhead. The mask is
+   a fixed-size gradient that is only ever *moved* (mask-position), never
+   rebuilt: recomputing a calc() gradient every frame used to cost more
+   main-thread style work than the whole WebGL canvas.
+
+   The sheen span repeats the line it sits on, in the same box, so the
+   highlight can never drift out of register with the letters. */
+.sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    #00a1ff 0%,
+    #5ad02b 22%,
+    #ffe90d 44%,
+    #ff6a1a 66%,
+    #ff0a9d 86%,
+    #7a1aa0 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 88%, transparent 100%);
+  -webkit-mask-size: 150px 100%;
+  mask-size: 150px 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: -9999px 0;
+  mask-position: -9999px 0;
+}
+
+/* Only the side-by-side layout carries the highlight. */
+.hero-headline:not([data-sheen]) .sheen {
+  display: none;
+}
+
+.hero-lead {
+  margin-top: clamp(0.9rem, 3vh, 2rem);
+  max-width: 32rem;
+  font-size: clamp(0.9rem, 2.2vh, 1.125rem);
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.hero-cta {
+  margin-top: clamp(1.25rem, 4.4vh, 2.75rem);
+}
+
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.625rem 0.625rem 1.75rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px -8px rgba(20, 30, 26, 0.35);
+  transition: box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-pill:hover {
+  box-shadow: 0 12px 32px -8px rgba(20, 30, 26, 0.45);
+}
+
+.btn-pill .btn-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  transition: transform, translate, scale, rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-pill:hover .btn-icon {
+  translate: 0 0.125rem;
+}
+
+/* Voice-note read-out, kept at the edge so the centre stays clear. */
+.hero-readout {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hero-readout > div {
+  margin-inline: auto;
+  display: flex;
+  justify-content: flex-end;
+  max-width: 1600px;
+  padding-inline: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+
+.hero-readout p {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.hero-readout .dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.hero-readout .time {
+  font-variant-numeric: tabular-nums;
+  color: rgba(20, 30, 26, 0.8);
+}
+
+.hero-readout .label {
+  display: none;
+}
+
+/* ---- entrance ----
+   The opening sequence the hero used to run through Motion, as transitions
+   that start when `is-ready` lands on the document. Scoped to `.js` so that
+   without scripting the hero is simply there. */
+
+/* The read-out animates on its inner element: the outer one carries the
+   scroll fade, which is written as an inline style and would otherwise win
+   over the entrance transition. */
+.js .hero-eyebrow,
+.js .hero-lead,
+.js .hero-cta,
+.js .hero-readout > div {
+  opacity: 0;
+  transform: translate3d(0, var(--enter-y, 1rem), 0);
+  transition:
+    opacity var(--enter-dur, 0.9s) var(--ease) var(--enter-delay, 0s),
+    transform var(--enter-dur, 0.9s) var(--ease) var(--enter-delay, 0s);
+}
+
+.js .hero-eyebrow {
+  --enter-y: 0.75rem;
+  --enter-dur: 0.8s;
+  --enter-delay: 0.15s;
+}
+.js .hero-lead {
+  --enter-delay: 0.75s;
+}
+.js .hero-cta {
+  --enter-delay: 0.95s;
+}
+.js .hero-readout > div {
+  --enter-y: 0.625rem;
+  --enter-delay: 1.3s;
+}
+
+.js.is-ready .hero-eyebrow,
+.js.is-ready .hero-lead,
+.js.is-ready .hero-cta,
+.js.is-ready .hero-readout > div {
+  opacity: 1;
+  transform: none;
+}
+
+/* Each headline line slides up out of its mask, one after the other. */
+.js .hero-line > span {
+  transform: translateY(110%);
+  transition: transform 1.2s var(--ease) var(--enter-delay, 0s);
+}
+.js .hero-line:nth-child(1) > span {
+  --enter-delay: 0.3s;
+}
+.js .hero-line:nth-child(2) > span {
+  --enter-delay: 0.42s;
+}
+.js.is-ready .hero-line > span {
+  transform: none;
+}
+
+@media (min-width: 640px) {
+  .hero-body {
+    padding-top: 8rem;
+  }
+
+  .hero-inner,
+  .hero-readout > div {
+    padding-inline: 2.5rem;
+  }
+
+  .hero-readout > div {
+    padding-bottom: 2.25rem;
+  }
+
+  /* 12px type sits in a 16px line box, not the inherited 1.5. The two pixels
+     of difference accumulate down the column and move the copy off the
+     baseline it shares with the waveform. */
+  .hero-eyebrow,
+  .hero-readout p {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+
+  .hero-readout .label {
+    display: inline;
+  }
+
+  .btn-pill {
+    font-size: 1rem;
+  }
+}
+
+/* The side-by-side layout. */
+@media (min-width: 1024px), (min-width: 640px) and (max-height: 620px) {
+  .hero-scrim {
+    background: linear-gradient(
+      to right,
+      rgba(244, 241, 234, 0.94),
+      rgba(244, 241, 234, 0.6) 28%,
+      transparent 58%
+    );
+  }
+
+  .hero-body {
+    align-items: center;
+    padding-top: 5rem;
+    padding-bottom: 0;
+  }
+
+  .hero-copy {
+    max-width: 40rem;
+  }
+}
+
+/* =========================================================================
+   Header
+
+   Fixed, visible from the first frame, and hidden while the visitor reads
+   downward. The two directions get different durations: leaving is quicker
+   than coming back, which is what makes it feel like it is getting out of
+   the way rather than flickering.
+   ========================================================================= */
+
+.site-header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+}
+
+.js .site-header {
+  opacity: 0;
+  transform: translateY(-16px);
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.5s var(--ease);
+}
+
+.js.is-ready .site-header {
+  opacity: 1;
+  transform: none;
+}
+
+.js.is-ready .site-header.is-hidden {
+  opacity: 0;
+  transform: translateY(-24px);
+  transition:
+    opacity 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+
+/* Soft fade so page content never collides with the logo and nav. */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 8rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(
+    to bottom,
+    var(--paper) 0,
+    var(--paper) 72%,
+    transparent 100%
+  );
+}
+
+.site-header.is-scrolled::before {
+  opacity: 1;
+}
+
+.site-header-inner {
+  position: relative;
+  margin-inline: auto;
+  display: flex;
+  max-width: 1600px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+}
+
+/* The negative margin keeps the enlarged focus/tap area from pushing the
+   logo off its optical alignment with the edge. */
+.site-logo {
+  display: inline-flex;
+  align-items: center;
+  margin: -0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.site-logo img {
+  height: 1.75rem;
+  width: auto;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(251, 249, 245, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.site-nav a {
+  padding: 0.625rem 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgba(20, 30, 26, 0.7);
+  transition:
+    color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover lives behind the label, as a pill that wipes in from the left.
+   Each section takes one of the brand's four hues, in the order the step
+   diagrams already use them, and Contact fills solid — it is the one thing
+   on this page that is an action rather than a destination.
+
+   Gated on a real pointer: on a touch screen there is no hover, and a
+   sticky :hover state left behind after a tap reads as a bug. */
+@media (hover: hover) and (pointer: fine) {
+  .site-nav a {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .site-nav a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 999px;
+    background: var(--nav-tint, rgba(20, 30, 26, 0.08));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.38s var(--ease);
+  }
+
+  .site-nav a:hover::before,
+  .site-nav a:focus-visible::before {
+    transform: scaleX(1);
+  }
+
+  .site-nav a:hover,
+  .site-nav a:focus-visible {
+    background: none;
+    color: var(--nav-ink, var(--ink));
+  }
+
+  .site-nav a:nth-child(1) {
+    --nav-tint: color-mix(in srgb, var(--ink-blue) 10%, transparent);
+    --nav-ink: var(--ink-blue);
+  }
+  .site-nav a:nth-child(2) {
+    --nav-tint: color-mix(in srgb, var(--ink-green) 10%, transparent);
+    --nav-ink: var(--ink-green);
+  }
+  .site-nav a:nth-child(3) {
+    --nav-tint: color-mix(in srgb, var(--ink-orange) 10%, transparent);
+    --nav-ink: var(--ink-orange);
+  }
+  .site-nav a:nth-child(4) {
+    --nav-tint: color-mix(in srgb, var(--ink-pink) 10%, transparent);
+    --nav-ink: var(--ink-pink);
+  }
+
+  /* The call to action fills completely. Its label waits for the ink to be
+     most of the way across before turning pale, so it is never pale type on
+     a pale background. */
+  .site-nav a.is-cta {
+    --nav-tint: var(--ink);
+  }
+
+  .site-nav a.is-cta:hover,
+  .site-nav a.is-cta:focus-visible {
+    color: var(--paper);
+    transition: color 0.18s var(--ease) 0.16s;
+  }
+}
+
+/* Without a pointer, the plain original. */
+@media not all and (hover: hover) {
+  .site-nav a:hover {
+    background: rgba(20, 30, 26, 0.1);
+    color: var(--ink);
+  }
+}
+
+/* The page you are already on. */
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+}
+
+/* Only Contact survives the narrow layout; the rest live in the page. */
+.site-nav a:not(.is-always) {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .site-header-inner {
+    padding: 1.5rem 2.5rem;
+  }
+
+  .site-logo img {
+    height: 2.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .site-nav a:not(.is-always) {
+    display: block;
+  }
+}
+
+/* =========================================================================
+   Footer
+
+   No background or top border of its own: the page-wide backdrop runs
+   straight through, so there is no seam between the last section and here.
+   ========================================================================= */
+
+.site-footer {
+  position: relative;
+  padding-inline: 1.25rem;
+}
+
+.site-footer-inner {
+  margin-inline: auto;
+  max-width: 1400px;
+}
+
+/* Voice-wave divider, aligned to the content column. */
+.wave-divider {
+  height: 3.5rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+
+.wave-divider canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.footer-main {
+  display: grid;
+  gap: 3rem;
+  padding-block: 3.5rem;
+}
+
+/* inline-block on purpose: the link then sits on the text baseline of its
+   line box, which adds the descender space underneath that the rest of the
+   column is spaced against. As a block it would ride 7px higher. */
+.footer-brand > a:first-child {
+  display: inline-block;
+}
+
+.footer-brand img {
+  height: 2.5rem;
+  width: auto;
+}
+
+.footer-brand p {
+  margin-top: 1.5rem;
+  max-width: 20rem;
+  font-size: 15px;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.footer-linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 1.75rem;
+  padding: 0.5rem 1rem 0.5rem 0.875rem;
+  border: 1px solid rgba(20, 30, 26, 0.15);
+  border-radius: 999px;
+  background: rgba(20, 30, 26, 0.04);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: rgba(20, 30, 26, 0.8);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-linkedin:hover {
+  translate: 0 -0.125rem;
+  border-color: rgba(20, 30, 26, 0.35);
+  background: rgba(20, 30, 26, 0.1);
+  color: var(--ink);
+}
+
+.footer-col-title {
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+/* The links are small, so each one carries a thumb-sized hit area. The
+   negative margin keeps that padding from moving them off the column edge
+   their neighbours line up on. */
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-left: -0.25rem;
+  padding-inline: 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 15px;
+  color: rgba(20, 30, 26, 0.7);
+  transition: color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link:hover {
+  color: var(--ink);
+}
+
+.footer-nav li + li {
+  margin-top: 0.125rem;
+}
+
+.footer-link-underlined {
+  color: rgba(20, 30, 26, 0.8);
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 30, 26, 0.25);
+  text-underline-offset: 4px;
+  transition:
+    color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    text-decoration-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link-underlined:hover {
+  color: var(--ink);
+  text-decoration-color: var(--ink);
+}
+
+.footer-address {
+  font-size: 15px;
+  font-style: normal;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.footer-address span {
+  display: block;
+}
+
+.footer-directions {
+  margin-top: 0.5rem;
+}
+
+.footer-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-block: 1.75rem;
+  border-top: 1px solid rgba(20, 30, 26, 0.1);
+  font-size: 13px;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+/* The one place the logo's own colours are allowed to run at full strength:
+   as a signature, not as type that has to be read at a glance. */
+.footer-builder {
+  display: inline-flex;
+  align-items: center;
+  margin-block: -0.5rem;
+  padding-block: 0.5rem;
+  /* Interpolated in OKLab, not sRGB: through that space the blue-to-pink
+     run keeps its chroma instead of dipping through a muddy violet. */
+  background-image: linear-gradient(
+    to right in oklab,
+    var(--ink-blue),
+    var(--ink-pink),
+    var(--ink-orange)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 500;
+  font-style: italic;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-builder:hover {
+  text-decoration-color: var(--muted);
+}
+
+@media (min-width: 640px) {
+  .site-footer {
+    padding-inline: 2.5rem;
+  }
+
+  .footer-main {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 2rem;
+  }
+
+  .footer-brand {
+    grid-column: span 3;
+  }
+
+  .footer-bottom {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-main {
+    grid-template-columns: 1.6fr 1fr 1.2fr 1.2fr;
+    column-gap: 3rem;
+    padding-block: 5rem;
+  }
+
+  .footer-brand {
+    grid-column: span 1;
+  }
+}
+
+/* Visible only to screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* -------------------------------------------------------------------------
+   Staggered reveals
+
+   A `data-reveal-group` does not animate itself: it waits for its threshold
+   and then releases its `data-rise` children, each on its own delay. That is
+   how a block of copy arrives as one gesture instead of three.
+   ------------------------------------------------------------------------- */
+
+.js [data-reveal-group] [data-rise] {
+  opacity: 0;
+  transform: translate3d(0, var(--rise-y, 28px), 0);
+  transition:
+    opacity var(--rise-dur, 0.9s) var(--ease) var(--rise-delay, 0s),
+    transform var(--rise-dur, 0.9s) var(--ease) var(--rise-delay, 0s);
+}
+
+.js [data-reveal-group].is-visible [data-rise] {
+  opacity: 1;
+  transform: none;
+}
+
+/* =========================================================================
+   RE-CITE
+
+   Copy and video side by side on wide screens; on narrow ones the video
+   comes first, because it says more in less space than the paragraph does.
+   ========================================================================= */
+
+.recite {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 7rem 1.25rem;
+}
+
+.recite-grid {
+  margin-inline: auto;
+  display: grid;
+  width: 100%;
+  max-width: 1400px;
+  align-items: center;
+  gap: 3rem;
+}
+
+.recite-copy {
+  order: 2;
+}
+
+.recite-media {
+  position: relative;
+  isolation: isolate;
+  order: 1;
+}
+
+.recite-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.recite-eyebrow .rule {
+  height: 1px;
+  width: 2rem;
+  background: rgba(20, 30, 26, 0.3);
+}
+
+.recite-title {
+  font-size: clamp(2.25rem, 4.4vw, 4.2rem);
+  color: var(--ink);
+}
+
+.recite-lead {
+  margin-top: 1.75rem;
+  max-width: 34rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+/* The video arrives a touch later than the copy, and from slightly further
+   away, so the eye lands on the words first. */
+.js .recite-media {
+  opacity: 0;
+  transform: translate3d(0, 40px, 0) scale(0.97);
+  transition:
+    opacity 1.1s var(--ease) 0.15s,
+    transform 1.1s var(--ease) 0.15s;
+}
+
+.js .recite-media.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (min-width: 640px) {
+  .recite {
+    padding-inline: 2.5rem;
+  }
+
+  .recite-eyebrow {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+
+  .recite-lead {
+    font-size: 1.125rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .recite {
+    padding-block: 5rem;
+  }
+
+  .recite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4rem;
+  }
+
+  .recite-copy {
+    order: 1;
+  }
+
+  .recite-media {
+    order: 2;
+  }
+}
+
+@media (min-width: 1280px) {
+  .recite-grid {
+    gap: 6rem;
+  }
+}
+
+/* =========================================================================
+   Video player
+   ========================================================================= */
+
+.video-player {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(20, 30, 26, 0.1);
+  border-radius: 1.75rem;
+  background: #000;
+  box-shadow: 0 20px 50px -24px rgba(20, 30, 26, 0.28);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.video-player video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* ---- the big play button over the poster ---- */
+
+.vp-big {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.video-player[data-playing] .vp-big {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.vp-big span {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(244, 241, 234, 0.9);
+  color: var(--ink);
+  box-shadow: 0 6px 20px -8px rgba(20, 30, 26, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: transform, translate, scale, rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.video-player:hover .vp-big span {
+  scale: 1.1;
+}
+
+/* ---- control bar ---- */
+
+.vp-bar {
+  position: absolute;
+  inset-inline: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid #ffffff26;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* before the first play there is nothing to control */
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 0.5rem;
+}
+
+.video-player[data-started] .vp-bar {
+  pointer-events: auto;
+  opacity: 1;
+  translate: none;
+}
+
+.vp-bar button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.vp-bar button:hover {
+  background: #ffffff26;
+}
+
+.vp-time {
+  width: 2.5rem;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: #ffffffb3;
+}
+
+.vp-duration {
+  display: none;
+}
+
+/* icons that swap with the player's state */
+.vp-bar [data-when-playing],
+.video-player[data-playing] .vp-bar [data-when-paused] {
+  display: none;
+}
+.video-player[data-playing] .vp-bar [data-when-playing] {
+  display: block;
+}
+
+.vp-bar [data-when-muted],
+.video-player[data-muted] .vp-bar [data-when-unmuted] {
+  display: none;
+}
+.video-player[data-muted] .vp-bar [data-when-muted] {
+  display: block;
+}
+
+.vp-bar [data-when-full],
+.video-player[data-full] .vp-bar [data-when-windowed] {
+  display: none;
+}
+.video-player[data-full] .vp-bar [data-when-full] {
+  display: block;
+}
+
+/* ---- seek bar ---- */
+
+input.seek {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  flex: 1 1 0%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #fff var(--p, 0%),
+    rgba(255, 255, 255, 0.22) var(--p, 0%)
+  );
+  cursor: pointer;
+}
+input.seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
+}
+input.seek::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+@media (min-width: 640px) {
+  .video-player {
+    border-radius: 2.25rem;
+  }
+
+  .vp-big span {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .vp-bar {
+    inset-inline: 1.25rem;
+    bottom: 1.25rem;
+  }
+
+  .vp-bar button {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .vp-duration {
+    display: block;
+  }
+}
+
+/* With a pointer there is room to let the bar step out of the way while the
+   video plays, and bring it back on hover or when it is paused. */
+@media (min-width: 768px) {
+  .video-player[data-started] .vp-bar {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+
+  .video-player[data-started]:hover .vp-bar,
+  .video-player[data-started]:focus-within .vp-bar,
+  .video-player[data-started]:not([data-playing]) .vp-bar {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* =========================================================================
+   Stats band
+
+   A full-width band between two column-based sections. Its job is as much
+   rhythm as information: the page otherwise runs four two-column blocks in
+   a row and reads as one long template.
+   ========================================================================= */
+
+.stats {
+  padding-inline: 1.25rem;
+}
+
+.stats-inner {
+  margin-inline: auto;
+  max-width: 1400px;
+  padding-block: 3rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.stats dl {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* The rule lives on the trailing edge of every item but the last, which is
+   how it stays between them when the grid turns from rows into columns. */
+.stats dl > :not(:last-child) {
+  border-bottom: 1px solid var(--line);
+}
+
+.stats dl > * {
+  padding-block: 1.5rem;
+}
+.stats dl > :first-child {
+  padding-top: 0;
+}
+.stats dl > :last-child {
+  padding-bottom: 0;
+}
+
+.stats dt {
+  font-size: clamp(2.6rem, 5vw, 4rem);
+  color: var(--ink);
+}
+
+.stats dt span {
+  margin-left: 0.5rem;
+  vertical-align: baseline;
+  font-size: 0.4em;
+  font-weight: 500;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.stats dd {
+  margin-top: 1rem;
+  max-width: 18rem;
+  font-size: 13px;
+  line-height: 1.625;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+@media (min-width: 640px) {
+  .stats {
+    padding-inline: 2.5rem;
+  }
+
+  .stats-inner {
+    padding-block: 4rem;
+  }
+
+  .stats dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stats dl > :not(:last-child) {
+    border-bottom: 0;
+    border-right: 1px solid var(--line);
+  }
+
+  .stats dl > * {
+    padding-block: 0;
+    padding-inline: 2.5rem;
+  }
+  .stats dl > :first-child {
+    padding-left: 0;
+  }
+  .stats dl > :last-child {
+    padding-right: 0;
+  }
+}
+
+/* =========================================================================
+   Vision
+
+   The company's own thesis, given the page's one centred, full-width
+   moment.
+   ========================================================================= */
+
+.vision {
+  padding: 5rem 1.25rem;
+}
+
+.vision figure {
+  margin-inline: auto;
+  max-width: 52rem;
+  text-align: center;
+}
+
+.vision figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-bottom: 2rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.vision figcaption .rule {
+  height: 1px;
+  width: 2rem;
+  background: rgba(20, 30, 26, 0.3);
+}
+
+.vision blockquote {
+  font-size: clamp(1.9rem, 4.2vw, 3.5rem);
+  color: var(--ink);
+}
+
+.vision p {
+  margin-inline: auto;
+  margin-top: 2rem;
+  max-width: 38rem;
+  font-size: 15px;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+/* The figure travels a little further than the page default. */
+.js .vision figure[data-reveal] {
+  --reveal-y: 24px;
+  --reveal-dur: 1s;
+}
+
+@media (min-width: 640px) {
+  .vision {
+    padding: 6rem 2.5rem;
+  }
+
+  .vision figcaption {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+
+  .vision p {
+    font-size: 1rem;
+    line-height: 1.625;
+  }
+}
+
+/* =========================================================================
+   Team
+   ========================================================================= */
+
+.team {
+  position: relative;
+  border-top: 1px solid rgba(20, 30, 26, 0.05);
+  padding: 6rem 1.25rem;
+}
+
+.team-inner {
+  margin-inline: auto;
+  max-width: 1400px;
+}
+
+.team-intro {
+  max-width: 40rem;
+}
+
+/* Wide enough for two: the statement on one side, what it means on the
+   other. The same shape the contact block and the opening statement use,
+   so the page keeps one way of introducing a section. */
+@media (min-width: 1024px) {
+  .team-intro {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+    max-width: none;
+  }
+
+  .team-lead {
+    margin-top: 0;
+    /* optically level with the first line of the heading beside it */
+    padding-top: 0.75rem;
+  }
+}
+
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.section-eyebrow .rule {
+  height: 1px;
+  width: 2rem;
+  background: rgba(20, 30, 26, 0.3);
+}
+
+.team-title {
+  font-size: clamp(2.3rem, 4.6vw, 3.9rem);
+  color: var(--ink);
+}
+
+.team-lead {
+  margin-top: 2rem;
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.team-lead em {
+  font-style: normal;
+  color: var(--ink);
+}
+
+.team-quote {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.team-roster {
+  margin-top: 5rem;
+}
+
+/* Named, not `.team-roster h3`: the cards live inside the roster and carry
+   an h3 of their own, which a descendant selector would reach. */
+.roster-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 3.5rem;
+  font-size: 1.7rem;
+  color: var(--ink);
+}
+
+.roster-title .rule {
+  height: 1px;
+  flex: 1 1 0%;
+  background: rgba(20, 30, 26, 0.1);
+}
+
+.js .roster-title[data-reveal] {
+  --reveal-y: 20px;
+  --reveal-dur: 0.8s;
+}
+
+.team-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.team-list li {
+  display: flex;
+}
+
+.member {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  padding: 1.5rem;
+  transition: border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.member:hover {
+  border-color: rgba(20, 30, 26, 0.25);
+}
+
+/* A pool of light that follows the cursor across the card. The position
+   comes from two custom properties the pointer handler writes. */
+.member-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(20, 30, 26, 0.05),
+    transparent 45%
+  );
+}
+
+.member:hover .member-glow {
+  opacity: 1;
+}
+
+.member-portrait {
+  position: relative;
+  margin-bottom: 1.75rem;
+}
+
+.member-portrait > div {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(20, 30, 26, 0.1);
+}
+
+.member-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform, translate, scale, rotate 0.7s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.member:hover .member-portrait img {
+  scale: 1.04;
+}
+
+.member-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.5rem;
+}
+
+.member-name h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.member-credentials {
+  border: 1px solid rgba(20, 30, 26, 0.15);
+  border-radius: 999px;
+  background: rgba(20, 30, 26, 0.06);
+  padding: 0.125rem 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.member-role {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.375;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.member-bio {
+  margin-top: 1.25rem;
+  font-size: 15px;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+@media (min-width: 640px) {
+  .team {
+    padding: 7rem 2.5rem;
+  }
+
+  .section-eyebrow {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+
+  .team-lead {
+    font-size: 1.125rem;
+  }
+
+  .team-roster {
+    margin-top: 6rem;
+  }
+
+  .roster-title {
+    font-size: 2.1rem;
+  }
+
+  .team-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .member {
+    padding: 1.75rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .team-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* Keeps the four cards' biographies starting on the same line even when a
+     role wraps onto two. */
+  .member-role {
+    min-height: 2.6rem;
+  }
+}
+
+/* =========================================================================
+   Contact
+   ========================================================================= */
+
+.contact {
+  position: relative;
+  border-top: 1px solid rgba(20, 30, 26, 0.05);
+  padding: 7rem 1.25rem 6rem;
+}
+
+.contact-grid {
+  position: relative;
+  margin-inline: auto;
+  display: grid;
+  max-width: 1400px;
+  gap: 3.5rem;
+}
+
+.contact-title {
+  font-size: clamp(2.4rem, 5.4vw, 5rem);
+  color: var(--ink);
+}
+
+.contact-lead {
+  margin-top: 1.75rem;
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.contact-email-block {
+  margin-top: 3rem;
+}
+
+.contact-label {
+  margin-bottom: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.contact-email {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: clamp(1.5rem, 3.6vw, 3.25rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+/* The underline grows from the left rather than appearing all at once: it
+   is a background whose width animates, so nothing reflows. */
+.contact-email span:first-child {
+  min-width: 0;
+  overflow-wrap: break-word;
+  padding-bottom: 0.25rem;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  transition: background-size 0.5s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.contact-email:hover span:first-child {
+  background-size: 100% 2px;
+}
+
+.contact-email svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  color: rgba(20, 30, 26, 0.65);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-email:hover svg {
+  translate: 0.125rem -0.125rem;
+  color: var(--ink);
+}
+
+.contact-actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  background: var(--ink);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: var(--paper);
+  transition: transform, translate, scale, rotate 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-solid:hover {
+  scale: 1.03;
+}
+
+.btn-outline {
+  display: inline-flex;
+  min-width: 9.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-outline:hover {
+  border-color: rgba(20, 30, 26, 0.25);
+}
+
+/* The button swaps its label for a tick once the address is on the
+   clipboard, and swaps back a couple of seconds later. */
+.btn-outline [data-copied],
+.btn-outline[data-state="copied"] [data-idle] {
+  display: none;
+}
+.btn-outline[data-state="copied"] [data-copied] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  padding: 1.75rem;
+}
+
+/* Location motif: rings around a point, bled off the corner. */
+.contact-radar {
+  pointer-events: none;
+  position: absolute;
+  right: -5rem;
+  top: -5rem;
+  width: 18rem;
+  height: 18rem;
+}
+
+.contact-radar span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(20, 30, 26, 0.08);
+  border-radius: 999px;
+}
+
+.contact-radar .pin {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 0;
+  background: var(--accent);
+}
+
+.contact-card > p {
+  position: relative;
+}
+
+.contact-address {
+  position: relative;
+  margin-top: 1.25rem;
+  font-size: 1.5rem;
+  line-height: 1.375;
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.contact-address span {
+  display: block;
+}
+
+.contact-directions {
+  position: relative;
+  margin-top: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(20, 30, 26, 0.15);
+  border-radius: 999px;
+  background: rgba(20, 30, 26, 0.05);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: var(--ink);
+  transition:
+    border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-directions:hover {
+  border-color: rgba(20, 30, 26, 0.3);
+  background: rgba(20, 30, 26, 0.1);
+}
+
+.contact-directions svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(20, 30, 26, 0.7);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-directions:hover svg {
+  translate: 0.125rem -0.125rem;
+  color: var(--ink);
+}
+
+@media (min-width: 640px) {
+  .contact {
+    padding: 9rem 2.5rem 8rem;
+  }
+
+  .contact-lead {
+    font-size: 1.125rem;
+  }
+
+  .contact-email svg {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .btn-solid,
+  .btn-outline {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .contact-card {
+    padding: 2.25rem;
+  }
+
+  .contact-address {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .contact-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 4rem;
+  }
+
+  .contact-main {
+    grid-column: span 7;
+  }
+
+  .contact-side {
+    grid-column: span 5;
+    align-self: end;
+  }
+}
+
+/* =========================================================================
+   How it works
+
+   Two layouts for the same four steps. On a screen with room, the stage is
+   pinned and the scroll itself moves through the steps. Everywhere else the
+   same four become a vertical timeline that reveals one at a time.
+
+   The switch is a single condition, shared with the script that drives it,
+   so the two can never disagree about which layout is on.
+   ========================================================================= */
+
+.hiw {
+  position: relative;
+  border-top: 1px solid rgba(20, 30, 26, 0.05);
+}
+
+.hiw-heading p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.hiw-heading .rule {
+  height: 1px;
+  width: 2rem;
+  background: rgba(20, 30, 26, 0.3);
+}
+
+.hiw-heading h2 {
+  font-size: clamp(2.1rem, 4vw, 3.6rem);
+  color: var(--ink);
+}
+
+/* The progress rail both layouts share: a hairline track with a coloured
+   bar scaled from the top as the visitor moves through the steps. */
+.hiw-rail {
+  position: absolute;
+  width: 1px;
+  border-radius: 999px;
+  background: rgba(20, 30, 26, 0.1);
+}
+
+.hiw-rail > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleY(var(--progress, 0));
+  transform-origin: top;
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    var(--ink-blue),
+    var(--ink-green) 35%,
+    var(--ink-orange) 70%,
+    var(--ink-pink)
+  );
+}
+
+/* ---- the stacked timeline (phones, tablets, short landscape) ---- */
+
+.hiw-stacked {
+  padding: 6rem 1.25rem;
+}
+
+.hiw-stacked > div {
+  margin-inline: auto;
+  max-width: 48rem;
+}
+
+.hiw-steps {
+  position: relative;
+  margin-top: 3.5rem;
+  padding-left: 2.25rem;
+}
+
+/* Every child, not just the list items: the original spaces this list
+   with Tailwind's space-y, which puts the margin on all but the last
+   child — and the first child here is the rail. That bottom margin pulls
+   the rail 80px short of the list, which is how it actually draws. */
+.hiw-steps > :not(:last-child) {
+  margin-bottom: 3.5rem;
+}
+
+.hiw-steps > .hiw-rail {
+  bottom: 0;
+  left: 7px;
+  top: 0.5rem;
+}
+
+.hiw-steps > li {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.hiw-dot {
+  position: absolute;
+  left: -2.25rem;
+  top: 0.375rem;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--paper);
+  border-radius: 999px;
+}
+
+.hiw-art {
+  overflow: hidden;
+  border-radius: 1.5rem;
+  /* No shadow of its own: `.panel` already carries one, and in the current
+     site it is the only one that lands — an unlayered rule outranks the
+     whole utilities layer, so the larger shadow the markup asks for never
+     applies. Matched here rather than quietly changed. */
+}
+
+.step-art {
+  position: relative;
+}
+
+.hiw-art .step-art,
+.hiw-art .step-svg {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  height: 100%;
+}
+
+.hiw-step-n {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hiw-steps h3 {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.hiw-steps li > div:last-child > p:last-child {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.js .hiw-steps > li[data-reveal] {
+  --reveal-y: 36px;
+  --reveal-dur: 0.9s;
+}
+
+/* ---- the pinned stage ---- */
+
+.hiw-pinned {
+  display: none;
+}
+
+.hiw-pinned-track {
+  position: relative;
+  height: 300vh;
+}
+
+.hiw-pinned-stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  height: 100svh;
+  align-items: center;
+  overflow: hidden;
+  padding-inline: 2.5rem;
+}
+
+.hiw-pinned-grid {
+  margin-inline: auto;
+  display: grid;
+  width: 100%;
+  max-width: 1400px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: center;
+  gap: 4rem;
+}
+
+.hiw-pinned-left {
+  grid-column: span 5;
+}
+
+.hiw-list {
+  position: relative;
+  margin-top: 3rem;
+  padding-left: 2rem;
+}
+
+.hiw-list > .hiw-rail {
+  bottom: 0.25rem;
+  left: 0;
+  top: 0.25rem;
+}
+
+.hiw-list button {
+  display: block;
+  width: 100%;
+  padding-block: 0.75rem;
+  text-align: left;
+}
+
+.hiw-list button > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.hiw-list .n {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(20, 30, 26, 0.68);
+  transition: color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hiw-list .t {
+  font-size: 1.5rem;
+  /* A ratio, not a fixed height: the size grows at 1280px and the line box
+     has to grow with it, or the four steps pack 21px tighter than they do
+     in the original and the whole centred column shifts. */
+  line-height: calc(2 / 1.5);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: rgba(20, 30, 26, 0.65);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hiw-list button:hover .t {
+  color: rgba(20, 30, 26, 0.8);
+}
+
+.hiw-list li[data-on] .n {
+  color: var(--step-accent);
+}
+.hiw-list li[data-on] .t,
+.hiw-list li[data-on] button:hover .t {
+  color: var(--ink);
+}
+
+/* The description opens by growing its grid row from zero, which animates
+   without the browser having to know the final height. */
+.hiw-list .desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.5s cubic-bezier(0, 0, 0.2, 1),
+    opacity 0.5s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.hiw-list li[data-on] .desc {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.hiw-list .desc > span {
+  overflow: hidden;
+}
+
+.hiw-list .desc span span {
+  display: block;
+  max-width: 24rem;
+  padding: 0.75rem 0 0.5rem 2.1rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.hiw-pinned-right {
+  position: relative;
+  grid-column: span 7;
+  display: flex;
+  justify-content: center;
+}
+
+.hiw-stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: min(36rem, 74svh);
+  overflow: hidden;
+  border-radius: 2rem;
+  /* Same as .hiw-art: the panel shadow is the one that shows. */
+}
+
+/* The four diagrams are stacked; the one in play fades and sharpens in
+   while the others drift back and blur. */
+.hiw-stage > .step-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  scale: 1.06;
+  filter: blur(10px);
+  transition:
+    opacity 0.7s var(--ease),
+    scale 0.7s var(--ease),
+    filter 0.7s var(--ease);
+}
+
+.hiw-stage > .step-art[data-on] {
+  opacity: 1;
+  scale: 1;
+  filter: blur(0px);
+}
+
+.hiw-stage .step-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hiw-hud {
+  position: absolute;
+  left: 1.25rem;
+  top: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  padding: 0.375rem 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink);
+}
+
+.hiw-hud span:first-child {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--step-accent);
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- the analysis sweep on the third diagram ----
+   A plain element rather than something inside the SVG: animations inside
+   an SVG are not composited, so every frame would cost the main thread
+   style and layout. */
+
+@keyframes step-scan {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(390%, 0, 0);
+  }
+}
+
+.step-scan {
+  pointer-events: none;
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  left: 13%;
+  width: 19.5%;
+  background: linear-gradient(90deg, transparent, #b94d131f 60%, #b94d1380);
+  border-right: 2px solid var(--ink-orange);
+  will-change: transform;
+  animation: step-scan 3.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-play-state: paused;
+}
+
+/* Only the diagram actually on screen, and actually in play, is allowed to
+   run its sweep. */
+.step-art[data-active="true"] .step-scan {
+  animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-scan {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .hiw-stacked {
+    padding: 7rem 2.5rem;
+  }
+
+  .hiw-heading p {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+
+  .hiw-steps {
+    padding-left: 3.5rem;
+  }
+
+  .hiw-steps > :not(:last-child) {
+    margin-bottom: 5rem;
+  }
+
+  .hiw-steps > .hiw-rail {
+    left: 9px;
+  }
+
+  .hiw-steps > li {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem;
+  }
+
+  .hiw-dot {
+    left: -3.5rem;
+    width: 19px;
+    height: 19px;
+  }
+
+  .hiw-art {
+    border-radius: 1.75rem;
+  }
+
+  .hiw-steps h3 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
+/* The one condition that decides the layout. */
+@media (min-width: 1024px) and (min-height: 620px) {
+  .hiw-stacked {
+    display: none;
+  }
+
+  .hiw-pinned {
+    display: block;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hiw-list .t {
+    font-size: 1.75rem;
+  }
+}
+
+/* =========================================================================
+   Not found
+
+   The only other page on the site. It borrows the shell rather than
+   repeating it: no header, no footer, just enough to say what happened and
+   get the visitor back.
+   ========================================================================= */
+
+.notfound {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 4rem 1.25rem;
+  text-align: center;
+}
+
+.notfound > div {
+  max-width: 34rem;
+}
+
+.notfound-logo {
+  display: inline-block;
+  margin-bottom: 3.5rem;
+}
+
+.notfound-logo img {
+  height: 2.25rem;
+  width: auto;
+}
+
+.notfound-code {
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.notfound-title {
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  color: var(--ink);
+}
+
+.notfound-lead {
+  margin: 1.5rem auto 2.5rem;
+  max-width: 28rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.notfound-contact {
+  margin-top: 3rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.notfound-contact a {
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 30, 26, 0.25);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notfound-contact a:hover {
+  text-decoration-color: var(--ink);
+}
+
+@media (min-width: 640px) {
+  .notfound-code {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+}
+
+/* =========================================================================
+   Questions
+
+   Built on <details> and <summary>, so opening and closing, the keyboard
+   and screen readers all work with no script at all — and keep working if
+   the JavaScript never arrives.
+
+   Used in two places: five questions at the foot of the home page, where
+   they answer the objections someone has just before writing, and all
+   thirteen on their own page.
+   ========================================================================= */
+
+.faq {
+  padding: 6rem 1.25rem;
+}
+
+.faq-inner {
+  margin-inline: auto;
+  max-width: 52rem;
+}
+
+.faq-group + .faq-group {
+  margin-top: 4rem;
+}
+
+.faq-group-title {
+  margin-bottom: 0.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  /* a question is a comfortable thing to hit, on a phone as much as a mouse */
+  min-height: 3.5rem;
+  padding-block: 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* the default disclosure triangle, in both engines */
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item summary::marker {
+  content: '';
+}
+
+.faq-item summary:hover {
+  color: rgba(20, 30, 26, 0.6);
+}
+
+.faq-item summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 0.25rem;
+}
+
+/* A plus that becomes a minus: two lines, one of which folds away. */
+.faq-mark {
+  position: relative;
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.2rem;
+}
+
+.faq-mark::before,
+.faq-mark::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 1.5px;
+  border-radius: 1px;
+  background: rgba(20, 30, 26, 0.55);
+  transition: transform 0.3s var(--ease);
+}
+
+.faq-mark::after {
+  transform: rotate(90deg);
+}
+
+.faq-item[open] .faq-mark::after {
+  transform: rotate(0deg);
+}
+
+.faq-answer {
+  padding-bottom: 1.75rem;
+  max-width: 44rem;
+}
+
+.faq-answer p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.faq-answer p + p {
+  margin-top: 1rem;
+}
+
+.faq-answer strong {
+  font-weight: 600;
+  color: rgba(20, 30, 26, 0.85);
+}
+
+/* The source behind a claim, set quieter than the claim itself. */
+.faq-cite {
+  margin-top: 1.25rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--line);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(20, 30, 26, 0.6);
+}
+
+.faq-cite a {
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 30, 26, 0.25);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-cite a:hover {
+  text-decoration-color: var(--ink);
+}
+
+/* Browsers that can animate a disclosure do; the rest simply open. */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  .faq-item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      block-size 0.35s var(--ease),
+      content-visibility 0.35s var(--ease) allow-discrete,
+      opacity 0.3s var(--ease);
+  }
+
+  .faq-item[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+/* ---- the five on the home page ---- */
+
+.faq-home-head {
+  margin-bottom: 3rem;
+}
+
+.faq-title {
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  color: var(--ink);
+}
+
+.faq-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 2.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.faq-more svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(20, 30, 26, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-more:hover svg {
+  translate: 0.25rem 0;
+  color: var(--ink);
+}
+
+.faq-more span {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  padding-bottom: 2px;
+  transition: background-size 0.4s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.faq-more:hover span {
+  background-size: 100% 1px;
+}
+
+/* ---- the page of its own ---- */
+
+.faq-page {
+  padding: 9rem 1.25rem 6rem;
+}
+
+.faq-page-head {
+  margin-inline: auto;
+  max-width: 52rem;
+  margin-bottom: 4.5rem;
+}
+
+.faq-page-head h1 {
+  font-size: clamp(2.4rem, 5.2vw, 4.4rem);
+  color: var(--ink);
+}
+
+.faq-page-head p {
+  margin-top: 1.5rem;
+  max-width: 36rem;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: rgba(20, 30, 26, 0.7);
+}
+
+.faq-page-head a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 30, 26, 0.25);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-page-head a:hover {
+  text-decoration-color: var(--ink);
+}
+
+@media (min-width: 640px) {
+  .faq {
+    padding: 7rem 2.5rem;
+  }
+
+  .faq-page {
+    padding: 11rem 2.5rem 7rem;
+  }
+
+  .faq-group-title {
+    font-size: 12px;
+    line-height: 1rem;
+  }
+
+  .faq-item summary {
+    font-size: 1.1875rem;
+    padding-block: 1.5rem;
+  }
+
+  .faq-answer p {
+    font-size: 1.0625rem;
+  }
+}
+
+/* =========================================================================
+   What is at stake
+
+   A beat between the hero and the product: the page used to go from the
+   hook straight to the solution, with no problem in between.
+
+   Deliberately not a heading. The one centred, display-size statement on
+   this page belongs to the vision; this is sober by comparison — left
+   aligned, set in the body face, and larger only by enough to be read
+   slowly.
+   ========================================================================= */
+
+.stakes {
+  /* Barely any padding of its own: the hero ends with a screen-bottom of
+     empty space and RE-CITE begins with one, so this sits in a gap that is
+     already generous. Its own 7rem used to stack onto both. */
+  padding: 2.5rem 1.25rem;
+}
+
+.stakes > div {
+  margin-inline: auto;
+  max-width: 1400px;
+  display: grid;
+  gap: 1.75rem;
+}
+
+.stakes-lead {
+  font-size: clamp(1.3rem, 2.6vw, 1.95rem);
+  line-height: 1.34;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+}
+
+.stakes-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(20, 30, 26, 0.65);
+}
+
+@media (min-width: 640px) {
+  .stakes {
+    /* Asymmetric on purpose. The hero ends with its own screen of empty
+       space and RE-CITE begins with one, so the only lever left is which
+       of the two this leans toward — and a problem belongs to the solution
+       that answers it, not to the line that preceded it. */
+    padding: 5rem 2.5rem 0;
+  }
+
+  .stakes-body {
+    font-size: 1.0625rem;
+  }
+}
+
+/* Side by side once there is width for it: the claim, and the circumstance
+   that explains it. Stacked, the two read as one long column against an
+   empty half-page. */
+@media (min-width: 900px) {
+  .stakes > div {
+    grid-template-columns: 1.35fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .stakes-body {
+    /* optically aligned with the first line of the statement beside it */
+    margin-top: 0.4rem;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Reduced motion
+   Last, so it overrides the entrance and reveal rules above.
+   ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal],
+  .js [data-reveal-group] [data-rise],
+  .js .recite-media,
+  .js .hero-eyebrow,
+  .js .hero-lead,
+  .js .hero-cta,
+  .js .hero-readout > div,
+  .js .hero-line > span,
+  .js .site-header {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /* The header still has to be able to get out of the way; it just does so
+     without animating. */
+  .js.is-ready .site-header.is-hidden {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

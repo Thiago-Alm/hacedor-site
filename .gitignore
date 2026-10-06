@@ -1,0 +1,5 @@
+# Windows and OneDrive leave these behind; they are not part of the site.
+Thumbs.db
+desktop.ini
+ehthumbs.db
+.DS_Store
