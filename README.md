@@ -3,26 +3,35 @@
 El sitio de Hacedor, LLC — `hacedor.org`.
 
 HTML, CSS y JavaScript. Sin framework, sin Node, sin paso de compilación: lo
-que hay en esta carpeta es exactamente lo que se sirve.
+que hay en `site/` es exactamente lo que se sirve.
 
 ## Cómo verlo
 
-Doble clic en `index.html`. No hace falta servidor ni instalar nada.
+Doble clic en `site/index.html`. No hace falta servidor ni instalar nada.
 
 ## Qué hay adentro
 
 ```
-index.html        la página principal
-faq.html          las trece preguntas
-404.html          página no encontrada
-css/site.css      todos los estilos
-css/fonts.css     las tres familias, autoalojadas
-js/               un archivo por pieza que se mueve
-fonts/ brand/ icons/ team/ video/
-Dockerfile        \ cómo se sirve: no son parte de la página
-Caddyfile         /  y no se entregan al visitante
-.github/          la revisión automática, que tampoco se sirve
+site/                   el sitio, y nada más que el sitio
+  index.html            la página principal
+  faq.html              las trece preguntas
+  404.html              página no encontrada
+  css/site.css          todos los estilos
+  css/fonts.css         las tres familias, autoalojadas
+  js/                   un archivo por pieza que se mueve
+  _headers              las cabeceras HTTP, para Cloudflare
+  fonts/ brand/ icons/ team/ video/
+
+wrangler.jsonc          cómo se publica en Cloudflare
+worker/index.js         y el Range del video, que Cloudflare no da solo
+Dockerfile              cómo se publica en cualquier otro lado
+Caddyfile               y las cabeceras de ese otro lado
+.github/                la revisión automática
 ```
+
+Esa división es lo único estructural que hay que respetar: **si un archivo
+no está dentro de `site/`, no llega al visitante**. No hay listas de
+exclusión que mantener ni archivos que acordarse de borrar.
 
 Cada archivo de `js/` hace una sola cosa: `voice-note.js` dibuja la onda del
 hero en WebGL, `video-player.js` es el reproductor, `how-it-works.js` mueve la
@@ -34,14 +43,14 @@ fuera de pantalla.
 
 | Qué | Dónde |
 |---|---|
-| Colores y tipografía | las variables al inicio de `css/site.css` |
-| Textos | directamente en `index.html` y `faq.html` |
-| Fotos del equipo | `team/`, reemplazando los `.webp` |
-| Video | `video/recite-trailer.mp4` y su póster |
-| La onda del hero | `js/voice-note.js`, el shader está adentro |
+| Colores y tipografía | las variables al inicio de `site/css/site.css` |
+| Textos | directamente en `site/index.html` y `site/faq.html` |
+| Fotos del equipo | `site/team/`, reemplazando los `.webp` |
+| Video | `site/video/recite-trailer.mp4` y su póster |
+| La onda del hero | `site/js/voice-note.js`, el shader está adentro |
 
 Las cinco preguntas de la home son una copia de cinco de las trece de
-`faq.html`. Si editás una respuesta, va en los dos archivos.
+`site/faq.html`. Si editás una respuesta, va en los dos archivos.
 
 Los cuatro diagramas de "How it works" están incrustados dos veces, una por
 maqueta, y **cada copia lleva sus identificadores numerados**. No es
@@ -51,23 +60,29 @@ renderiza no pinta nada.
 
 ## Cómo se publica
 
-`Dockerfile` y `Caddyfile` sirven el sitio con Caddy. Sin Node y sin
-compilación; la imagen no tiene gestor de paquetes.
+**En Cloudflare.** `wrangler.jsonc` apunta a `site/` y eso es todo lo que
+sube; no hay compilación, los archivos viajan como están. Las cabeceras no
+las pone un servidor: las lee Cloudflare de `site/_headers`.
 
-El `Dockerfile` nombra lo que entra en la imagen, pieza por pieza, en vez
-de copiar la carpeta y después borrar lo que sobra. Si un día agregás un
-archivo a la raíz, hay que sumarlo ahí. Olvidarse de una línea de esa lista
-hace que un archivo dé 404 —se nota al toque y no filtra nada—, mientras que
-olvidarse de una línea en una lista de borrado publica un archivo. La
-revisión automática no deja que la lista se quede vieja: falla si las
-páginas piden algo que no se copia.
+`worker/index.js` son cincuenta líneas que solo tocan el video. El
+almacenamiento estático de Cloudflare contesta cualquier pedido con el
+archivo entero, y un navegador necesita pedidos por rango para poder
+adelantar; Safari y iOS directamente no reproducen un MP4 servido sin eso.
+Todo lo que no es video sale derecho, sin ejecutar nada.
+
+**En cualquier otro lado**, `Dockerfile` y `Caddyfile` sirven la misma
+carpeta con Caddy, que responde rangos por sí solo. Sin Node y sin
+compilación; la imagen no tiene gestor de paquetes.
 
 El `Caddyfile` son unas 80 líneas. Cinco bastarían para entregar los
 archivos: el resto son las cabeceras de seguridad (CSP, HSTS,
 anti-clickjacking, cámara y micrófono desactivados), las reglas de caché, y
-el 404 con su código correcto. Caddy
-responde *Range* por sí solo, que es lo que el video necesita para poder
-adelantarse.
+el 404 con su código correcto.
+
+Las mismas cabeceras, entonces, están escritas dos veces: en `site/_headers`
+para Cloudflare y en el `Caddyfile` para Caddy. Una política escrita dos
+veces se separa sola, y la mitad que se separa es la que nadie mira, así que
+la revisión automática compara las dos y falla si dejan de coincidir.
 
 ## Decisiones que conviene conocer
 
@@ -93,8 +108,9 @@ En cada cambio corre `.github/scripts/check.mjs`, que no deja pasar una
 referencia a un archivo que no está (ni escrito con otras mayúsculas: corre
 en Linux), un enlace interno que no aterriza en ningún lado, un
 identificador repetido dentro del mismo documento, un enlace que abra
-pestaña nueva, una pregunta de la home que ya no coincide con `faq.html`, ni
-un archivo que el sitio necesite y la imagen no copie.
+pestaña nueva, una pregunta de la home que ya no coincide con `faq.html`, un
+archivo que el sitio necesite y la imagen no copie, ni una diferencia entre
+las cabeceras de Cloudflare y las de Caddy.
 
 El sitio se comparó contra la versión anterior píxel a píxel, sección por
 sección, en seis tamaños de pantalla, con movimiento reducido activado para

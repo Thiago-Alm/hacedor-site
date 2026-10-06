@@ -1,32 +1,20 @@
-# The whole site, served by Caddy.
+# The site, served by Caddy. This is the alternative to Cloudflare: same
+# folder, another host, without touching a line of the site.
 #
-# There is no build stage: what is in this folder is what gets served. The
-# image has no Node, no package manager and nothing to patch beyond Caddy
-# itself — which is the point of the rewrite.
+# There is no build stage: what is in site/ is what gets served. The image
+# has no Node, no package manager and nothing to patch beyond Caddy itself
+# — which is the point of the rewrite.
 FROM caddy:2-alpine
 
 COPY Caddyfile /etc/caddy/Caddyfile
 
-# Only the site goes in, named piece by piece.
-#
-# `COPY . /srv` would be shorter, and then everything that is not the site
-# — the git history, the deployment files, the notes — would have to be
-# deleted again afterwards by a list somebody has to remember to update.
-# Forgetting a line there publishes a file; forgetting a line here makes a
-# file 404, which is noticed immediately and leaks nothing.
-#
-# The check in .github keeps this list honest: it fails if the pages ask
-# for a file that is not copied here.
-COPY index.html faq.html 404.html /srv/
-COPY robots.txt sitemap.xml manifest.webmanifest /srv/
-COPY favicon.ico icon.png apple-icon.png /srv/
-COPY opengraph-image.jpg twitter-image.jpg /srv/
-COPY css/ /srv/css/
-COPY js/ /srv/js/
-COPY fonts/ /srv/fonts/
-COPY brand/ /srv/brand/
-COPY icons/ /srv/icons/
-COPY team/ /srv/team/
-COPY video/ /srv/video/
+# site/ goes in, and nothing else. What lives outside it describes how the
+# site is published — this file, the worker, the notes, the checks — and by
+# being outside it cannot be published by accident.
+COPY site/ /srv/
+
+# Cloudflare reads this file instead of being told the headers by a server,
+# so here it means nothing and is not handed to anyone.
+RUN rm -f /srv/_headers
 
 EXPOSE 8080

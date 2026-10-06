@@ -10,6 +10,7 @@ import { join, relative, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
+const SITE = join(ROOT, "site");
 const PAGES = ["index.html", "faq.html", "404.html"];
 
 const problems = [];
@@ -18,26 +19,23 @@ function fail(file, message) {
 }
 
 /* ---------------------------------------------------------------------
-   Every file in the repository, spelled exactly as it is on disk.
+   Every file of the site, spelled exactly as it is on disk.
 
    Membership is tested against this list rather than asking the file
    system, because Windows would answer yes to `Team/Thiago.webp` and the
    Linux container it is deployed on would answer no.
    --------------------------------------------------------------------- */
 
-const SKIP = new Set([".git", ".github", "node_modules"]);
-
 function walk(dir, out = new Set()) {
   for (const name of readdirSync(dir)) {
-    if (SKIP.has(name)) continue;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) walk(full, out);
-    else out.add(relative(ROOT, full).split("\\").join("/"));
+    else out.add(relative(SITE, full).split("\\").join("/"));
   }
   return out;
 }
 
-const FILES = walk(ROOT);
+const FILES = walk(SITE);
 
 /* ---------------------------------------------------------------------
    What counts as a reference to a file of our own.
@@ -64,7 +62,7 @@ function resolveRef(value) {
 const pages = new Map();
 
 for (const name of PAGES) {
-  const html = readFileSync(join(ROOT, name), "utf8");
+  const html = readFileSync(join(SITE, name), "utf8");
   const ids = [];
   for (const m of html.matchAll(/\sid="([^"]+)"/g)) ids.push(m[1]);
   pages.set(name, { html, ids, idSet: new Set(ids) });
@@ -94,7 +92,7 @@ const CSS_URLS = /\b()url\(["']?([^"')]+)["']?\)/g;
 for (const [name, page] of pages) checkRefs(name, page.html, HTML_ATTRS);
 
 for (const css of [...FILES].filter((f) => f.endsWith(".css"))) {
-  const text = readFileSync(join(ROOT, css), "utf8");
+  const text = readFileSync(join(SITE, css), "utf8");
   for (const m of text.matchAll(CSS_URLS)) {
     const value = m[2].trim();
     if (!isLocalPath(value)) continue;
@@ -208,14 +206,106 @@ for (const line of dockerfile.split(/\r?\n/)) {
       continue;
     }
     const clean = src.replace(/^\.?\//, "").replace(/\/$/, "");
-    if (FILES.has(clean)) served.add(clean);
-    else for (const f of FILES) if (f.startsWith(clean + "/")) served.add(f);
+    if (clean === "site") {
+      for (const f of FILES) served.add(f);
+      continue;
+    }
+    if (!clean.startsWith("site/")) continue; // not part of the site
+    const inside = clean.slice("site/".length);
+    if (FILES.has(inside)) served.add(inside);
+    else for (const f of FILES) if (f.startsWith(inside + "/")) served.add(f);
   }
 }
 
 for (const path of [...referenced, ...ALWAYS]) {
   if (!served.has(path)) fail("Dockerfile", `does not copy ${path}, which the site needs`);
 }
+
+/* ---------------------------------------------------------------------
+   7. The two hosts are told the same thing.
+
+      Cloudflare reads site/_headers; Caddy reads the Caddyfile. The same
+      policy written twice in two syntaxes is the kind of thing that drifts
+      quietly, and the half that drifts is the half nobody is looking at.
+   --------------------------------------------------------------------- */
+
+const headersFile = readFileSync(join(SITE, "_headers"), "utf8");
+const caddyfile = readFileSync(join(ROOT, "Caddyfile"), "utf8");
+
+const squash = (v) => v.trim().replace(/\s+/g, " ");
+
+// site/_headers: a path, then indented "Header: value" lines under it.
+const fromHeaders = new Map(); // "path\u0000Header" -> value
+{
+  let path = null;
+  for (const raw of headersFile.split(/\r?\n/)) {
+    const line = raw.replace(/\s+#.*$/, "");
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    if (!/^\s/.test(line)) {
+      path = line.trim();
+      continue;
+    }
+    const m = line.match(/^\s+([A-Za-z-]+):\s*(.+)$/);
+    if (m && path) fromHeaders.set(path + "\u0000" + m[1], squash(m[2]));
+  }
+}
+
+// Caddyfile: one `header { ... }` block for everything, plus named path
+// matchers with a Cache-Control line each.
+const fromCaddy = new Map();
+{
+  // Walked line by line rather than matched as a block: the Caddyfile is
+  // edited on Windows and checked on Linux, so the line endings differ.
+  let inHeaderBlock = false;
+  const matchers = new Map(); // @name -> [paths]
+
+  for (const raw of caddyfile.split(/\r?\n/)) {
+    const line = raw.trimEnd();
+    const bare = line.trim();
+
+    if (bare === "header {") {
+      inHeaderBlock = true;
+      continue;
+    }
+    if (inHeaderBlock) {
+      if (bare === "}") inHeaderBlock = false;
+      else {
+        const m = line.match(/^\s*([A-Za-z-]+)\s+"(.*)"$/);
+        if (m) fromCaddy.set("/*\u0000" + m[1], squash(m[2]));
+      }
+      continue;
+    }
+
+    const def = line.match(/^\s*@(\w+)\s+path\s+(.+)$/);
+    if (def) {
+      matchers.set(def[1], def[2].trim().split(/\s+/));
+      continue;
+    }
+
+    const use = line.match(/^\s*header\s+@(\w+)\s+([A-Za-z-]+)\s+"(.*)"$/);
+    if (use) {
+      for (const path of matchers.get(use[1]) || []) {
+        fromCaddy.set(path + "\u0000" + use[2], squash(use[3]));
+      }
+    }
+  }
+}
+
+for (const [key, value] of fromHeaders) {
+  const [path, name] = key.split("\u0000");
+  if (!fromCaddy.has(key)) fail("Caddyfile", `does not set ${name} for ${path}, and _headers does`);
+  else if (fromCaddy.get(key) !== value) fail("Caddyfile", `sets a different ${name} for ${path} than _headers does`);
+}
+
+for (const key of fromCaddy.keys()) {
+  const [path, name] = key.split("\u0000");
+  if (!fromHeaders.has(key)) fail("site/_headers", `does not set ${name} for ${path}, and the Caddyfile does`);
+}
+
+// If either side comes back nearly empty the parser broke, and silence
+// would read as agreement.
+if (fromHeaders.size < 8) fail("site/_headers", "was read but almost nothing came out of it");
+if (fromCaddy.size < 8) fail("Caddyfile", "was read but almost nothing came out of it");
 
 /* ------------------------------------------------------------------- */
 
