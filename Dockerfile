@@ -8,8 +8,8 @@ FROM caddy:2-alpine
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY . /srv
 
-# These three belong to the folder, not to the site: they describe how to
-# serve it, so they must not be served.
-RUN rm -f /srv/Dockerfile /srv/Caddyfile /srv/README.md /srv/.gitignore /srv/.gitattributes /srv/NOTAS.md
+# These belong to the folder, not to the site: they describe how to serve
+# it and how it is checked, so none of them is served.
+RUN rm -rf /srv/Dockerfile /srv/Caddyfile /srv/README.md /srv/.gitignore /srv/.gitattributes /srv/NOTAS.md /srv/.github
 
 EXPOSE 8080
