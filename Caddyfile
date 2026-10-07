@@ -55,6 +55,11 @@
 	@media path /brand/* /icons/* /team/* /video/*
 	header @media Cache-Control "public, max-age=86400"
 
+	# Cloudflare serves /faq.html as /faq, and that is the address the
+	# page calls its own. Caddy is told the same, so a link that works on
+	# one host is not a 404 on the other.
+	try_files {path} {path}.html
+
 	# A missing page gets the site's own 404, with the right status.
 	handle_errors {
 		@notfound expression {err.status_code} == 404
