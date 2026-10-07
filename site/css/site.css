@@ -1360,20 +1360,25 @@ input.seek::-moz-range-thumb {
   }
 }
 
-/* With a pointer there is room to let the bar step out of the way while the
-   video plays, and bring it back on hover or when it is paused. */
-@media (min-width: 768px) {
-  .video-player[data-started] .vp-bar {
-    opacity: 0;
-    translate: 0 0.5rem;
-  }
+/* While the video plays, the controls step out of the way, and the pointer
+   goes with them.
 
-  .video-player[data-started]:hover .vp-bar,
-  .video-player[data-started]:focus-within .vp-bar,
-  .video-player[data-started]:not([data-playing]) .vp-bar {
-    opacity: 1;
-    translate: none;
-  }
+   Hover cannot decide this. The pointer is already sitting on the player
+   the instant the visitor clicks to start, so a hover rule would keep the
+   bar on screen for the whole video — which is the opposite of what it is
+   for. What matters is whether the visitor is doing something, not where
+   the pointer happens to rest, so the script marks the player [data-idle]
+   after a few seconds without input and clears it on the first movement,
+   on keyboard focus, and whenever the video is paused. */
+.video-player[data-idle] .vp-bar {
+  pointer-events: none;
+  opacity: 0;
+  translate: 0 0.5rem;
+}
+
+.video-player[data-idle],
+.video-player[data-idle] video {
+  cursor: none;
 }
 
 /* =========================================================================
