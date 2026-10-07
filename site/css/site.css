@@ -1381,6 +1381,40 @@ input.seek::-moz-range-thumb {
   cursor: none;
 }
 
+/* In full screen the player takes the shape of the screen, and on a phone
+   held upright with rotation locked that shape is a tall rectangle. The
+   video is 16:9, so filling it would crop away most of the frame and
+   magnify what is left — which is what it was doing. Full screen is the
+   one place where showing the whole picture matters more than filling the
+   box, so the video is allowed to letterbox against the black.
+
+   Written twice on purpose. The attribute is ours and always arrives; the
+   pseudo-class lands a frame earlier and spares the flash of a cropped
+   frame while the browser finishes the switch. They cannot share one
+   selector list: a browser that does not know the pseudo-class would
+   throw away the attribute along with it. */
+.video-player[data-full] {
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.video-player[data-full] video {
+  object-fit: contain;
+}
+
+.video-player:fullscreen {
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.video-player:fullscreen video {
+  object-fit: contain;
+}
+
 /* =========================================================================
    Stats band
 
