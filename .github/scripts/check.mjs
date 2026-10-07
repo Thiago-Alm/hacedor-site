@@ -307,6 +307,42 @@ for (const key of fromCaddy.keys()) {
 if (fromHeaders.size < 8) fail("site/_headers", "was read but almost nothing came out of it");
 if (fromCaddy.size < 8) fail("Caddyfile", "was read but almost nothing came out of it");
 
+/* ---------------------------------------------------------------------
+   8. The sitemap lists every page, by the address each page claims.
+
+      A page that calls itself one thing and is listed as another tells a
+      search engine two stories. This reads the canonical out of each page
+      and requires the sitemap to say exactly the same set, so neither can
+      be edited alone.
+   --------------------------------------------------------------------- */
+
+{
+  const sitemap = readFileSync(join(SITE, "sitemap.xml"), "utf8");
+  const listed = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim()));
+
+  const claimed = new Map(); // canonical -> page
+  for (const [name, page] of pages) {
+    if (name === "404.html") continue; // a 404 is not indexed and not listed
+    const m = page.html.match(/<link rel="canonical" href="([^"]+)"/);
+    if (!m) {
+      fail(name, "has no canonical link, so there is nothing to compare the sitemap against");
+      continue;
+    }
+    claimed.set(m[1], name);
+
+    // og:url is the same address written a second time, so it drifts too.
+    const og = page.html.match(/property="og:url" content="([^"]+)"/);
+    if (og && og[1] !== m[1]) fail(name, `says og:url is ${og[1]} and canonical is ${m[1]}`);
+  }
+
+  for (const [url, name] of claimed) {
+    if (!listed.has(url)) fail("site/sitemap.xml", `does not list ${url}, which ${name} calls itself`);
+  }
+  for (const url of listed) {
+    if (!claimed.has(url)) fail("site/sitemap.xml", `lists ${url}, which no page calls itself`);
+  }
+}
+
 /* ------------------------------------------------------------------- */
 
 if (problems.length) {
