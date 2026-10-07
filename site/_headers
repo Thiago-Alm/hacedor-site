@@ -1,0 +1,58 @@
+# HTTP headers for the site. Cloudflare reads this file, and so does
+# Netlify: a path, then indented "Header: value" lines under it.
+#
+# This file and the Caddyfile's `header` block say the same thing in two
+# syntaxes, because each host reads its own. The check in .github compares
+# them and fails if they drift apart.
+
+/*
+  # The browser only loads what this site itself needs. Nothing comes from
+  # third parties (the fonts are self-hosted), so every source is 'self'.
+  # 'unsafe-inline' covers the style attributes a few elements carry and
+  # the one inline line that marks scripting as available.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+  # Always use HTTPS for a year. No includeSubDomains or preload: hard to
+  # undo, and it would reach other hacedor.org subdomains too.
+  Strict-Transport-Security: max-age=31536000
+
+  # Stop the browser from guessing file types.
+  X-Content-Type-Options: nosniff
+
+  # Nobody may put this site inside a frame.
+  X-Frame-Options: DENY
+
+  # Don't leak the full URL when following a link to another site.
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Powerful features the site never uses are switched off. The video
+  # player needs fullscreen on this origin, so that one stays on.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), accelerometer=(), gyroscope=(), magnetometer=(), browsing-topics=(), fullscreen=(self)
+
+  # Isolate this site's window from pages that open it.
+  Cross-Origin-Opener-Policy: same-origin
+
+# Font files never change once published.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Code is replaced in place on every update, so it is revalidated rather
+# than cached blind: nothing is fingerprinted, because there is no build
+# step to fingerprint it.
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/brand/*
+  Cache-Control: public, max-age=86400
+
+/icons/*
+  Cache-Control: public, max-age=86400
+
+/team/*
+  Cache-Control: public, max-age=86400
+
+/video/*
+  Cache-Control: public, max-age=86400

@@ -1,0 +1,27 @@
+// Publishing on Cloudflare: serve the site/ folder as it is.
+//
+// No build step. Cloudflare uploads the files unchanged, and the worker
+// only gets involved with the video, so that it can be seeked.
+{
+  // Must match the project name chosen in the Cloudflare dashboard.
+  "name": "hacedor-site",
+  "main": "./worker/index.js",
+  "compatibility_date": "2025-09-01",
+
+  // Per-branch preview URLs are not needed, and they would be public.
+  "preview_urls": false,
+
+  "assets": {
+    // Only this is published. What is outside site/ describes how the site
+    // is published, and is not the site.
+    "directory": "./site",
+    "binding": "ASSETS",
+
+    // A URL that does not exist gets the site's own 404, with its code.
+    "not_found_handling": "404-page",
+
+    // Only the video goes through the worker. Everything else comes
+    // straight out of static storage, running no code at all.
+    "run_worker_first": ["/video/*"]
+  }
+}
