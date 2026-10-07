@@ -56,8 +56,14 @@
        hover rule would keep the bar up for the whole thing.
        ----------------------------------------------------------------- */
 
-    var IDLE_DELAY = 2600;
+    // A mouse brings the controls back by merely moving, so it can afford
+    // to lose them quickly. A finger has to travel and land on a target it
+    // can no longer see, so hiding too eagerly turns into a chase.
+    var IDLE_MOUSE = 2600;
+    var IDLE_TOUCH = 4000;
+
     var idleTimer = null;
+    var lastPointer = "mouse";
 
     // Is somebody navigating the controls with the keyboard right now?
     //
@@ -89,16 +95,35 @@
     function wake() {
       box.removeAttribute("data-idle");
       clearTimeout(idleTimer);
-      if (!video.paused) idleTimer = setTimeout(sleep, IDLE_DELAY);
+      if (!video.paused) {
+        idleTimer = setTimeout(sleep, lastPointer === "mouse" ? IDLE_MOUSE : IDLE_TOUCH);
+      }
     }
 
-    box.addEventListener("pointermove", wake);
+    box.addEventListener("pointermove", function (e) {
+      lastPointer = e.pointerType || "mouse";
+      wake();
+    });
+
+    box.addEventListener("pointerdown", function (e) {
+      lastPointer = e.pointerType || "mouse";
+      // Pressing a control restarts the clock. Not the video itself: a
+      // tap there, while the controls are away, is only asking for them
+      // back, and that is settled on the click so the video is not
+      // paused by the same gesture.
+      if (e.target !== video) wake();
+    });
+
     box.addEventListener("focusin", wake);
     box.addEventListener("focusout", wake);
 
-    box.addEventListener("pointerleave", function () {
-      // The pointer left the player: there is nothing to keep the
-      // controls up for.
+    box.addEventListener("pointerleave", function (e) {
+      // Only a mouse can leave. A finger lifting off the glass also
+      // raises this event, and it does so at the end of every single
+      // tap — including the tap that just asked for the controls. Acting
+      // on that put them away again before they could be used, which
+      // left them impossible to reach on a phone.
+      if ((e.pointerType || "mouse") !== "mouse") return;
       clearTimeout(idleTimer);
       sleep();
     });
