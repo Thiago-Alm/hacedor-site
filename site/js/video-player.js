@@ -60,14 +60,22 @@
     var idleTimer = null;
 
     // Is somebody navigating the controls with the keyboard right now?
+    //
     // Having focus is not enough to say yes: clicking the play button
-    // leaves focus on it, and that must not keep the bar on screen for
-    // the whole video. :focus-visible is the browser's own answer to
-    // "was this focus reached by keyboard", which is the question.
+    // leaves focus on it, and that must not keep the bar up for the whole
+    // video. The browsers' own answer to this, :focus-visible, does not
+    // mean the same thing everywhere — some of them call a clicked button
+    // keyboard-focused — and when it says yes wrongly the controls never
+    // leave. So the question is answered here instead, by remembering
+    // what the visitor last did.
+    var lastInputWasKey = false;
+    document.addEventListener("keydown", function () { lastInputWasKey = true; }, true);
+    document.addEventListener("pointerdown", function () { lastInputWasKey = false; }, true);
+
     function keyboardInside() {
       var el = document.activeElement;
       if (!el || el === video || !box.contains(el)) return false;
-      return typeof el.matches === "function" && el.matches(":focus-visible");
+      return lastInputWasKey;
     }
 
     function sleep() {
@@ -126,6 +134,18 @@
       box.setAttribute("data-started", "");
       bigPlay.tabIndex = -1;
       playBtn.setAttribute("aria-label", "Pause");
+
+      // The big button has just disappeared under the playing video, and
+      // leaving the focus on something invisible is a dead end: the
+      // visitor cannot see what the keyboard would act on. Somebody who
+      // got here with the keyboard is handed the pause button, which is
+      // where they were going anyway; somebody who clicked simply lets it
+      // go, and with it the only reason the controls would have stayed up.
+      if (document.activeElement === bigPlay) {
+        if (lastInputWasKey) playBtn.focus();
+        else bigPlay.blur();
+      }
+
       wake();
     });
     video.addEventListener("pause", function () {
