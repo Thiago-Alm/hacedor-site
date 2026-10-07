@@ -849,57 +849,6 @@ html.lenis body {
   color: rgba(20, 30, 26, 0.65);
 }
 
-.footer-linkedin {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.625rem;
-  margin-top: 1.75rem;
-  padding: 0.5rem 1rem 0.5rem 0.875rem;
-  border: 1px solid rgba(20, 30, 26, 0.15);
-  border-radius: 999px;
-  background: rgba(20, 30, 26, 0.04);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-  color: rgba(20, 30, 26, 0.8);
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.footer-linkedin:hover {
-  translate: 0 -0.125rem;
-  border-color: rgba(20, 30, 26, 0.35);
-  background: rgba(20, 30, 26, 0.1);
-  color: var(--ink);
-}
-
-.footer-col-title {
-  margin-bottom: 1.25rem;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.28em;
-  color: rgba(20, 30, 26, 0.7);
-}
-
-/* The links are small, so each one carries a thumb-sized hit area. The
-   negative margin keeps that padding from moving them off the column edge
-   their neighbours line up on. */
-.footer-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  margin-left: -0.25rem;
-  padding-inline: 0.25rem;
-  border-radius: 0.25rem;
-  font-size: 15px;
-  color: rgba(20, 30, 26, 0.7);
-  transition: color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.footer-link:hover {
-  color: var(--ink);
-}
-
 .footer-nav li + li {
   margin-top: 0.125rem;
 }
@@ -919,21 +868,6 @@ html.lenis body {
   text-decoration-color: var(--ink);
 }
 
-.footer-address {
-  font-size: 15px;
-  font-style: normal;
-  line-height: 1.625;
-  color: rgba(20, 30, 26, 0.7);
-}
-
-.footer-address span {
-  display: block;
-}
-
-.footer-directions {
-  margin-top: 0.5rem;
-}
-
 .footer-bottom {
   display: flex;
   flex-direction: column;
@@ -945,12 +879,9 @@ html.lenis body {
 }
 
 /* The one place the logo's own colours are allowed to run at full strength:
-   as a signature, not as type that has to be read at a glance. */
+   as a signature, not as type that has to be read at a glance. It is a
+   credit, not a link, so it carries no underline and nothing to click. */
 .footer-builder {
-  display: inline-flex;
-  align-items: center;
-  margin-block: -0.5rem;
-  padding-block: 0.5rem;
   /* Interpolated in OKLab, not sRGB: through that space the blue-to-pink
      run keeps its chroma instead of dipping through a muddy violet. */
   background-image: linear-gradient(
@@ -964,14 +895,6 @@ html.lenis body {
   color: transparent;
   font-weight: 500;
   font-style: italic;
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 4px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.footer-builder:hover {
-  text-decoration-color: var(--muted);
 }
 
 @media (min-width: 640px) {
@@ -997,7 +920,7 @@ html.lenis body {
 
 @media (min-width: 1024px) {
   .footer-main {
-    grid-template-columns: 1.6fr 1fr 1.2fr 1.2fr;
+    grid-template-columns: 1.6fr 1fr 1.2fr;
     column-gap: 3rem;
     padding-block: 5rem;
   }
@@ -1884,12 +1807,16 @@ input.seek::-moz-range-thumb {
   color: rgba(20, 30, 26, 0.7);
 }
 
+/* The address is the whole point of this section now that nothing else
+   competes with it, and it has the full row to itself, so it is allowed
+   to grow into it rather than sit at the size it had when it shared the
+   space with a card. */
 .contact-email {
   display: inline-flex;
   max-width: 100%;
   align-items: center;
   gap: 0.75rem;
-  font-size: clamp(1.5rem, 3.6vw, 3.25rem);
+  font-size: clamp(1.5rem, 5vw, 4.5rem);
   font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--ink);
@@ -1984,94 +1911,6 @@ input.seek::-moz-range-thumb {
   gap: 0.5rem;
 }
 
-.contact-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 1.75rem;
-  padding: 1.75rem;
-}
-
-/* Location motif: rings around a point, bled off the corner. */
-.contact-radar {
-  pointer-events: none;
-  position: absolute;
-  right: -5rem;
-  top: -5rem;
-  width: 18rem;
-  height: 18rem;
-}
-
-.contact-radar span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border: 1px solid rgba(20, 30, 26, 0.08);
-  border-radius: 999px;
-}
-
-.contact-radar .pin {
-  width: 0.75rem;
-  height: 0.75rem;
-  border: 0;
-  background: var(--accent);
-}
-
-.contact-card > p {
-  position: relative;
-}
-
-.contact-address {
-  position: relative;
-  margin-top: 1.25rem;
-  font-size: 1.5rem;
-  line-height: 1.375;
-  font-weight: 500;
-  font-style: normal;
-  letter-spacing: -0.025em;
-  color: var(--ink);
-}
-
-.contact-address span {
-  display: block;
-}
-
-.contact-directions {
-  position: relative;
-  margin-top: 2rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid rgba(20, 30, 26, 0.15);
-  border-radius: 999px;
-  background: rgba(20, 30, 26, 0.05);
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-  color: var(--ink);
-  transition:
-    border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.contact-directions:hover {
-  border-color: rgba(20, 30, 26, 0.3);
-  background: rgba(20, 30, 26, 0.1);
-}
-
-.contact-directions svg {
-  width: 1rem;
-  height: 1rem;
-  color: rgba(20, 30, 26, 0.7);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.contact-directions:hover svg {
-  translate: 0.125rem -0.125rem;
-  color: var(--ink);
-}
-
 @media (min-width: 640px) {
   .contact {
     padding: 9rem 2.5rem 8rem;
@@ -2091,14 +1930,6 @@ input.seek::-moz-range-thumb {
     font-size: 1rem;
     line-height: 1.5rem;
   }
-
-  .contact-card {
-    padding: 2.25rem;
-  }
-
-  .contact-address {
-    font-size: 1.75rem;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -2108,12 +1939,7 @@ input.seek::-moz-range-thumb {
   }
 
   .contact-main {
-    grid-column: span 7;
-  }
-
-  .contact-side {
-    grid-column: span 5;
-    align-self: end;
+    grid-column: span 12;
   }
 }
 
