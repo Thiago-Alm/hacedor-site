@@ -879,9 +879,18 @@ html.lenis body {
 }
 
 /* The one place the logo's own colours are allowed to run at full strength:
-   as a signature, not as type that has to be read at a glance. It is a
-   credit, not a link, so it carries no underline and nothing to click. */
+   as a signature, not as type that has to be read at a glance.
+
+   It is the only link on the site that leaves it, and it stays in the same
+   tab like every other one: a new tab would start with no history and
+   leave the visitor without a way back. */
 .footer-builder {
+  display: inline-flex;
+  align-items: center;
+  /* Pulled back out again as padding: the underline sits where it did,
+     and the target is tall enough to hit with a thumb. */
+  margin-block: -0.5rem;
+  padding-block: 0.5rem;
   /* Interpolated in OKLab, not sRGB: through that space the blue-to-pink
      run keeps its chroma instead of dipping through a muddy violet. */
   background-image: linear-gradient(
@@ -895,6 +904,14 @@ html.lenis body {
   color: transparent;
   font-weight: 500;
   font-style: italic;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-builder:hover {
+  text-decoration-color: var(--muted);
 }
 
 @media (min-width: 640px) {
